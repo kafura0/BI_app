@@ -1,0 +1,177 @@
+"use client";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Plus, Database, Trash2, BarChart2, RefreshCw, CheckCircle, Clock, XCircle, Download, FileText } from "lucide-react";
+import { datasetsApi, dashboardsApi, getErrorMessage } from "@/lib/api";
+import type { Dataset } from "@/types";
+import { formatBytes, formatDate, formatNumber } from "@/lib/utils";
+
+const statusConfig = {
+  ready: { icon: CheckCircle, color: "text-emerald-400", bg: "bg-emerald-400/10", label: "Ready" },
+  processing: { icon: Clock, color: "text-amber-400", bg: "bg-amber-400/10", label: "Processing" },
+  pending: { icon: Clock, color: "text-slate-400", bg: "bg-slate-400/10", label: "Pending" },
+  failed: { icon: XCircle, color: "text-red-400", bg: "bg-red-400/10", label: "Failed" },
+};
+
+function ExportMenu({ datasetId }: { datasetId: string }) {
+  const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : "";
+  const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+
+  const download = (url: string) => {
+    const a = document.createElement("a");
+    a.href = `${url}`;
+    a.style.display = "none";
+    // Attach token as query param for file downloads since headers aren't supported
+    a.href = `${url}?token=${token}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  return (
+    <div className="flex gap-1">
+      <a
+        href={`${base}/export/datasets/${datasetId}/csv`}
+        download
+        className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-medium rounded-lg transition-colors"
+        title="Export CSV"
+      >
+        <Download className="w-3 h-3" /> CSV
+      </a>
+      <a
+        href={`${base}/export/datasets/${datasetId}/pdf`}
+        download
+        className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-medium rounded-lg transition-colors"
+        title="Export PDF report"
+      >
+        <FileText className="w-3 h-3" /> PDF
+      </a>
+    </div>
+  );
+}
+
+export default function DatasetsPage() {
+  const [datasets, setDatasets] = useState<Dataset[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [generating, setGenerating] = useState<string | null>(null);
+
+  const load = async () => {
+    try {
+      const res = await datasetsApi.list();
+      setDatasets(res.data.items);
+    } catch (e) {
+      setError(getErrorMessage(e));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this dataset and all associated dashboards?")) return;
+    try {
+      await datasetsApi.delete(id);
+      setDatasets((prev) => prev.filter((d) => d.id !== id));
+    } catch (e) {
+      setError(getErrorMessage(e));
+    }
+  };
+
+  const handleGenerateDashboard = async (datasetId: string, name: string) => {
+    setGenerating(datasetId);
+    try {
+      await dashboardsApi.create({ name: `${name} — Dashboard`, dataset_id: datasetId });
+      window.location.href = "/dashboard";
+    } catch (e) {
+      setError(getErrorMessage(e));
+      setGenerating(null);
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Datasets</h1>
+          <p className="text-slate-400 text-sm mt-0.5">Upload and manage your data sources</p>
+        </div>
+        <Link href="/datasets/upload" className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors">
+          <Plus className="w-4 h-4" /> Upload Dataset
+        </Link>
+      </div>
+
+      {error && (
+        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">{error}</div>
+      )}
+
+      {loading ? (
+        <div className="flex justify-center py-16"><RefreshCw className="w-6 h-6 text-indigo-400 animate-spin" /></div>
+      ) : datasets.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mb-4">
+            <Database className="w-8 h-8 text-slate-600" />
+          </div>
+          <h3 className="text-white font-medium mb-2">No datasets yet</h3>
+          <p className="text-slate-500 text-sm mb-6">Upload a CSV or Excel file to get started</p>
+          <Link href="/datasets/upload" className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg transition-colors text-sm">
+            <Plus className="w-4 h-4" /> Upload your first dataset
+          </Link>
+        </div>
+      ) : (
+        <div className="grid gap-4">
+          {datasets.map((dataset) => {
+            const status = statusConfig[dataset.status] ?? statusConfig.pending;
+            const StatusIcon = status.icon;
+            return (
+              <div key={dataset.id} className="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-colors">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-4 flex-1 min-w-0">
+                    <div className="w-10 h-10 bg-indigo-600/10 rounded-lg flex items-center justify-center mt-0.5 shrink-0">
+                      <Database className="w-5 h-5 text-indigo-400" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-white font-semibold">{dataset.name}</h3>
+                      {dataset.description && <p className="text-slate-500 text-sm mt-0.5 truncate">{dataset.description}</p>}
+                      <div className="flex items-center gap-4 mt-2 flex-wrap">
+                        <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full ${status.bg} ${status.color}`}>
+                          <StatusIcon className="w-3 h-3" />
+                          {status.label}
+                        </span>
+                        <span className="text-slate-500 text-xs">{formatNumber(dataset.row_count)} rows</span>
+                        <span className="text-slate-500 text-xs">{dataset.column_count} columns</span>
+                        <span className="text-slate-500 text-xs">{formatBytes(dataset.file_size_bytes)}</span>
+                        <span className="text-slate-500 text-xs">{formatDate(dataset.created_at)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-wrap shrink-0">
+                    {dataset.status === "ready" && <ExportMenu datasetId={dataset.id} />}
+                    {dataset.status === "ready" && (
+                      <button
+                        onClick={() => handleGenerateDashboard(dataset.id, dataset.name)}
+                        disabled={generating === dataset.id}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 text-xs font-medium rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        {generating === dataset.id ? <RefreshCw className="w-3 h-3 animate-spin" /> : <BarChart2 className="w-3 h-3" />}
+                        Auto Dashboard
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleDelete(dataset.id)}
+                      className="p-1.5 text-slate-600 hover:text-red-400 transition-colors rounded-lg hover:bg-red-400/10"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}

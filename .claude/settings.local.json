@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker --version)",
+      "Bash(docker compose *)",
+      "Bash(python *)",
+      "Bash(grep -v \"^$\")",
+      "Bash(grep -v \"^\\\\s*$\")",
+      "Bash(netstat -ano)",
+      "Bash(tasklist /FI \"PID eq 21884\")",
+      "Bash(tasklist /FI \"PID eq 22724\")",
+      "Bash(powershell *)",
+      "Bash(curl -s http://localhost:8001/health)"
+    ]
+  }
+}
