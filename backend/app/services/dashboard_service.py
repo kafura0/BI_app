@@ -144,7 +144,7 @@ def _compute_widget_data(df: pd.DataFrame, widget: dict) -> Any:
     return []
 
 
-async def auto_create_dashboard(db: AsyncSession, organization_id: uuid.UUID, dataset_id: uuid.UUID, created_by: uuid.UUID) -> DashboardOut:
+async def auto_create_dashboard(db: AsyncSession, organization_id: uuid.UUID, dataset_id: uuid.UUID, created_by: uuid.UUID, name: str | None = None) -> DashboardOut:
     dataset = await get_dataset_or_404(db, dataset_id, organization_id)
     widgets = _auto_generate_widgets(dataset.schema_definition)
 
@@ -152,7 +152,7 @@ async def auto_create_dashboard(db: AsyncSession, organization_id: uuid.UUID, da
         organization_id=organization_id,
         dataset_id=dataset_id,
         created_by=created_by,
-        name=f"{dataset.name} — Auto Dashboard",
+        name=name or f"{dataset.name} — Auto Dashboard",
         widgets=widgets,
         is_default=True,
     )

@@ -35,7 +35,7 @@ async def create_dashboard(
         return DashboardOut.model_validate(dashboard)
     else:
         # Auto-generate widgets from dataset schema
-        return await dashboard_service.auto_create_dashboard(db, tenant.organization_id, data.dataset_id, tenant.user_id)
+        return await dashboard_service.auto_create_dashboard(db, tenant.organization_id, data.dataset_id, tenant.user_id, data.name)
 
 
 @router.get("", response_model=list[DashboardOut])
