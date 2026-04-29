@@ -33,3 +33,10 @@ export function clearAuth(): void {
 export function isAuthenticated(): boolean {
   return Boolean(loadAuth()?.token);
 }
+
+export function patchStoredUser(patch: Partial<User>): void {
+  const auth = loadAuth();
+  if (!auth) return;
+  const updated = { ...auth, user: { ...auth.user, ...patch } };
+  localStorage.setItem(AUTH_KEY, JSON.stringify(updated));
+}

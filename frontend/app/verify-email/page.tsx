@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { authApi, getErrorMessage } from "@/lib/api";
+import { patchStoredUser } from "@/lib/auth";
 
 function VerifyContent() {
   const searchParams = useSearchParams();
@@ -15,7 +16,10 @@ function VerifyContent() {
   useEffect(() => {
     if (!token) { setStatus("error"); setMessage("No verification token provided."); return; }
     authApi.verifyEmail(token)
-      .then(() => setStatus("success"))
+      .then(() => {
+        patchStoredUser({ email_verified: true });
+        setStatus("success");
+      })
       .catch((e) => { setStatus("error"); setMessage(getErrorMessage(e)); });
   }, [token]);
 
