@@ -9,12 +9,12 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 
 const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/datasets", icon: Database, label: "Datasets" },
-  { href: "/insights", icon: MessageSquare, label: "AI Insights" },
-  { href: "/team", icon: Users, label: "Team" },
-  { href: "/admin", icon: ShieldCheck, label: "Analytics" },
-  { href: "/billing", icon: CreditCard, label: "Billing" },
+  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", adminOnly: false },
+  { href: "/datasets", icon: Database, label: "Datasets", adminOnly: false },
+  { href: "/insights", icon: MessageSquare, label: "AI Insights", adminOnly: false },
+  { href: "/team", icon: Users, label: "Team", adminOnly: false },
+  { href: "/admin", icon: ShieldCheck, label: "Analytics", adminOnly: true },
+  { href: "/billing", icon: CreditCard, label: "Billing", adminOnly: false },
 ];
 
 export function Sidebar() {
@@ -50,7 +50,7 @@ export function Sidebar() {
       </div>
 
       {/* Email verification banner */}
-      {user && !(user as { email_verified?: boolean }).email_verified && (
+      {user && !user.email_verified && (
         <div className="mx-3 mt-3 px-3 py-2 bg-amber-600/10 border border-amber-600/20 rounded-lg">
           <p className="text-amber-400 text-xs font-medium">Verify your email</p>
           <p className="text-slate-500 text-xs mt-0.5">Check your inbox to confirm your account.</p>
@@ -59,7 +59,7 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-4 py-4 space-y-1">
-        {navItems.map(({ href, icon: Icon, label }) => {
+        {navItems.filter(({ adminOnly }) => !adminOnly || user?.role === "admin").map(({ href, icon: Icon, label }) => {
           const active = pathname === href || pathname.startsWith(href + "/");
           return (
             <Link

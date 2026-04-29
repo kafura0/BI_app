@@ -74,7 +74,8 @@ async def export_dataset_pdf(db: AsyncSession, dataset_id: uuid.UUID, organizati
         pdf.set_text_color(71, 85, 105)
 
         if col_stat.get("dtype") == "numeric":
-            pdf.cell(0, 5, f"  Min: {col_stat.get('min', 'N/A')}  |  Max: {col_stat.get('max', 'N/A')}  |  Mean: {col_stat.get('mean', 'N/A'):.2f}  |  Nulls: {col_stat.get('null_count', 0)}", ln=True)
+            fmt = lambda v: f"{v:.2f}" if isinstance(v, (int, float)) else "N/A"
+            pdf.cell(0, 5, f"  Min: {fmt(col_stat.get('min'))}  |  Max: {fmt(col_stat.get('max'))}  |  Mean: {fmt(col_stat.get('mean'))}  |  Nulls: {col_stat.get('null_count', 0)}", ln=True)
         else:
             pdf.cell(0, 5, f"  Unique values: {col_stat.get('unique_count', 'N/A')}  |  Nulls: {col_stat.get('null_count', 0)}", ln=True)
         pdf.ln(1)
@@ -113,7 +114,8 @@ async def export_dashboard_pdf(db: AsyncSession, dashboard_id: uuid.UUID, organi
 
         w_type = widget.get("type")
         if w_type == "metric_card" and isinstance(widget_data, dict):
-            pdf.cell(0, 6, f"Value: {widget_data.get('value', 0):,.2f}", ln=True)
+            val = widget_data.get("value", 0)
+            pdf.cell(0, 6, f"Value: {val:,.2f}" if isinstance(val, (int, float)) else f"Value: {val}", ln=True)
         elif isinstance(widget_data, list) and widget_data:
             pdf.cell(0, 6, f"Data points: {len(widget_data)}", ln=True)
             # First 5 rows

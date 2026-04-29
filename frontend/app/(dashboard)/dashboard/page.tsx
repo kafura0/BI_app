@@ -65,15 +65,19 @@ export default function DashboardPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this dashboard?")) return;
-    await dashboardsApi.delete(id);
-    const remaining = dashboards.filter((d) => d.id !== id);
-    setDashboards(remaining);
-    if (activeDashboard === id) {
-      setActiveDashboard(remaining[0]?.id ?? null);
-      if (remaining[0]) {
-        const res = await dashboardsApi.getData(remaining[0].id);
-        setDashboardData(res.data.widget_data);
+    try {
+      await dashboardsApi.delete(id);
+      const remaining = dashboards.filter((d) => d.id !== id);
+      setDashboards(remaining);
+      if (activeDashboard === id) {
+        setActiveDashboard(remaining[0]?.id ?? null);
+        if (remaining[0]) {
+          const res = await dashboardsApi.getData(remaining[0].id);
+          setDashboardData(res.data.widget_data);
+        }
       }
+    } catch {
+      toastError("Failed to delete dashboard");
     }
   };
 

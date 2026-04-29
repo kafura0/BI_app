@@ -37,7 +37,7 @@ export function useAuth(): UseAuthReturn {
     try {
       const { data } = await authApi.login(email, password);
       const stored: StoredAuth = {
-        user: data.user,
+        user: { ...data.user, role: data.role as User["role"] },
         organization: data.organization,
         token: data.token.access_token,
       };
@@ -57,7 +57,7 @@ export function useAuth(): UseAuthReturn {
     try {
       const { data: resp } = await authApi.register(data);
       const stored: StoredAuth = {
-        user: resp.user,
+        user: { ...resp.user, role: resp.role as User["role"] },
         organization: resp.organization,
         token: resp.token.access_token,
       };

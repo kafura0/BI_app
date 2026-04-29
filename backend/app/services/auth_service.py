@@ -62,6 +62,7 @@ async def register_user(db: AsyncSession, data: UserCreate) -> RegisterResponse:
         user=UserOut.model_validate(user),
         organization=OrganizationOut.model_validate(org),
         token=Token(access_token=token_str, expires_in=expires_in),
+        role=MemberRole.admin.value,
     )
 
 
@@ -91,4 +92,5 @@ async def login_user(db: AsyncSession, email: str, password: str) -> RegisterRes
         user=UserOut.model_validate(user),
         organization=OrganizationOut.model_validate(org),
         token=Token(access_token=token_str, expires_in=expires_in),
+        role=membership.role.value,
     )

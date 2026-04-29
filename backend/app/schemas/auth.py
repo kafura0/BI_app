@@ -84,3 +84,4 @@ class RegisterResponse(BaseModel):
     user: UserOut
     organization: OrganizationOut
     token: Token
+    role: str = "admin"
