@@ -1,11 +1,10 @@
 "use client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import GridLayout, { Layout } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import { Plus, Trash2, Settings2, GripVertical } from "lucide-react";
+import { Plus, Trash2, GripVertical } from "lucide-react";
 import type { WidgetConfig } from "@/types";
-import { cn } from "@/lib/utils";
 
 const WIDGET_TYPE_LABELS: Record<WidgetConfig["type"], string> = {
   line_chart: "Line Chart",
@@ -113,6 +112,19 @@ function AddWidgetModal({ columns, onAdd, onClose }: AddWidgetModalProps) {
 
 export function WidgetGrid({ widgets, columns, onChange, readOnly = false }: WidgetGridProps) {
   const [showAddModal, setShowAddModal] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(800);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setContainerWidth(entry.contentRect.width);
+    });
+    observer.observe(el);
+    setContainerWidth(el.getBoundingClientRect().width);
+    return () => observer.disconnect();
+  }, []);
 
   const layout: Layout[] = widgets.map((w) => ({
     i: w.id,
@@ -159,7 +171,7 @@ export function WidgetGrid({ widgets, columns, onChange, readOnly = false }: Wid
   };
 
   return (
-    <div>
+    <div ref={containerRef}>
       {!readOnly && (
         <div className="flex justify-end mb-4">
           <button
@@ -186,7 +198,7 @@ export function WidgetGrid({ widgets, columns, onChange, readOnly = false }: Wid
           layout={layout}
           cols={12}
           rowHeight={60}
-          width={1200}
+          width={containerWidth}
           isDraggable={!readOnly}
           isResizable={!readOnly}
           onLayoutChange={handleLayoutChange}

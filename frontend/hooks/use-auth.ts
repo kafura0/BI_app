@@ -10,7 +10,7 @@ interface UseAuthReturn {
   organization: Organization | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, redirectTo?: string) => Promise<void>;
   register: (data: {
     email: string;
     password: string;
@@ -31,7 +31,7 @@ export function useAuth(): UseAuthReturn {
     setAuth(loadAuth());
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string, redirectTo = "/dashboard") => {
     setIsLoading(true);
     setError(null);
     try {
@@ -43,7 +43,7 @@ export function useAuth(): UseAuthReturn {
       };
       saveAuth(stored.user, stored.organization, stored.token);
       setAuth(stored);
-      router.push("/dashboard");
+      router.push(redirectTo);
     } catch (e) {
       setError(getErrorMessage(e));
     } finally {
