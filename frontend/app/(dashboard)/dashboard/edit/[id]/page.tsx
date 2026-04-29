@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, Loader2, RefreshCw } from "lucide-react";
-import { dashboardsApi, getErrorMessage } from "@/lib/api";
+import { dashboardsApi, datasetsApi, getErrorMessage } from "@/lib/api";
 import type { Dashboard, WidgetConfig } from "@/types";
 import { WidgetGrid } from "@/components/dashboard/widget-grid";
 
@@ -28,13 +28,9 @@ export default function DashboardEditPage() {
         setWidgets(d.widgets as WidgetConfig[]);
         setName(d.name);
 
-        // Derive column names from widget configs
-        const cols = new Set<string>();
-        d.widgets.forEach((w: WidgetConfig) => {
-          if (w.x_column) cols.add(w.x_column);
-          if (w.y_column) cols.add(w.y_column);
-        });
-        setColumns(Array.from(cols));
+        // Fetch dataset schema to get all available columns (not just the ones already in widgets)
+        const dsRes = await datasetsApi.get(d.dataset_id);
+        setColumns(dsRes.data.schema_definition.columns.map((c) => c.name));
       } catch (e) {
         setError(getErrorMessage(e));
       } finally {
@@ -89,7 +85,7 @@ export default function DashboardEditPage() {
         <p className="text-slate-500 text-sm mb-4">Drag widgets to reorder · Resize by dragging the corner · Click ＋ to add widgets</p>
         <WidgetGrid
           widgets={widgets}
-          columns={columns.length > 0 ? columns : ["column_a", "column_b", "date"]}
+          columns={columns}
           onChange={setWidgets}
         />
       </div>
