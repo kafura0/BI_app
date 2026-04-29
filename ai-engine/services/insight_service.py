@@ -19,10 +19,14 @@ def _get_provider() -> AIProvider:
 
 
 def _format_column_stats(df: pd.DataFrame) -> str:
+    def fmt(v: float) -> str:
+        return f"{v:.2f}" if pd.notna(v) else "N/A"
+
     lines = []
     for col in df.columns:
         if pd.api.types.is_numeric_dtype(df[col]):
-            lines.append(f"  {col} (numeric): min={df[col].min():.2f}, max={df[col].max():.2f}, mean={df[col].mean():.2f}, nulls={df[col].isna().sum()}")
+            s = df[col].dropna()
+            lines.append(f"  {col} (numeric): min={fmt(s.min())}, max={fmt(s.max())}, mean={fmt(s.mean())}, nulls={df[col].isna().sum()}")
         else:
             top = df[col].value_counts().head(3).to_dict()
             lines.append(f"  {col} (text): {df[col].nunique()} unique values, top={top}, nulls={df[col].isna().sum()}")
@@ -70,6 +74,7 @@ async def generate_insight(query: str, df: pd.DataFrame | None = None) -> dict[s
         user_message=user_message,
         max_tokens=int(os.environ.get("OPENAI_MAX_TOKENS", "2048")),
         temperature=0.3,
+        response_format={"type": "json_object"},
     )
 
     parsed = _safe_parse_json(result.content)
