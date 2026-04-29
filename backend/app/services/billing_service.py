@@ -89,18 +89,17 @@ async def create_customer_portal_session(db: AsyncSession, organization_id: uuid
 
 async def handle_webhook(db: AsyncSession, payload: bytes, sig_header: str) -> dict:
     """Process Stripe webhook events. Call from the webhook endpoint."""
-    client = _stripe_client()
+    if not settings.STRIPE_WEBHOOK_SECRET:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Billing not configured")
 
     try:
-        event = stripe.WebhookSignature.verify_header(
-            payload.decode(),
-            sig_header,
-            settings.STRIPE_WEBHOOK_SECRET,
-        )
+        event_data = stripe.Webhook.construct_event(payload, sig_header, settings.STRIPE_WEBHOOK_SECRET)
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid webhook payload")
     except stripe.SignatureVerificationError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid webhook signature")
 
-    event_data = stripe.Event.construct_from(event, stripe.api_key)  # type: ignore
+    client = _stripe_client()
     event_type = event_data["type"]
     obj = event_data["data"]["object"]
 

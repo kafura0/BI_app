@@ -27,7 +27,7 @@ async def create_insight(
 
     # Lazy import to keep startup fast
     import sys, os
-    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../../../ai-engine"))
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../../ai-engine"))
     from services.insight_service import generate_insight  # type: ignore
 
     sample_df = None

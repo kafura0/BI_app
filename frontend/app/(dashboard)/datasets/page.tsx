@@ -5,6 +5,8 @@ import { Plus, Database, Trash2, BarChart2, RefreshCw, CheckCircle, Clock, XCirc
 import { datasetsApi, dashboardsApi, getErrorMessage } from "@/lib/api";
 import type { Dataset } from "@/types";
 import { formatBytes, formatDate, formatNumber } from "@/lib/utils";
+import { downloadWithAuth } from "@/lib/download";
+import { useToast } from "@/components/ui/toast";
 
 const statusConfig = {
   ready: { icon: CheckCircle, color: "text-emerald-400", bg: "bg-emerald-400/10", label: "Ready" },
@@ -13,39 +15,42 @@ const statusConfig = {
   failed: { icon: XCircle, color: "text-red-400", bg: "bg-red-400/10", label: "Failed" },
 };
 
-function ExportMenu({ datasetId }: { datasetId: string }) {
-  const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : "";
-  const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
-  const download = (url: string) => {
-    const a = document.createElement("a");
-    a.href = `${url}`;
-    a.style.display = "none";
-    // Attach token as query param for file downloads since headers aren't supported
-    a.href = `${url}?token=${token}`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+function ExportMenu({ datasetId, datasetName }: { datasetId: string; datasetName: string }) {
+  const { error: toastError } = useToast();
+  const [downloading, setDownloading] = useState<"csv" | "pdf" | null>(null);
+
+  const handleDownload = async (type: "csv" | "pdf") => {
+    setDownloading(type);
+    try {
+      const url = `${BASE_URL}/export/datasets/${datasetId}/${type}`;
+      await downloadWithAuth(url, `${datasetName}.${type}`);
+    } catch {
+      toastError(`Failed to download ${type.toUpperCase()}`);
+    } finally {
+      setDownloading(null);
+    }
   };
 
   return (
     <div className="flex gap-1">
-      <a
-        href={`${base}/export/datasets/${datasetId}/csv`}
-        download
-        className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-medium rounded-lg transition-colors"
+      <button
+        onClick={() => handleDownload("csv")}
+        disabled={downloading !== null}
+        className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-400 hover:text-white text-xs font-medium rounded-lg transition-colors"
         title="Export CSV"
       >
-        <Download className="w-3 h-3" /> CSV
-      </a>
-      <a
-        href={`${base}/export/datasets/${datasetId}/pdf`}
-        download
-        className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-medium rounded-lg transition-colors"
+        {downloading === "csv" ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />} CSV
+      </button>
+      <button
+        onClick={() => handleDownload("pdf")}
+        disabled={downloading !== null}
+        className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-400 hover:text-white text-xs font-medium rounded-lg transition-colors"
         title="Export PDF report"
       >
-        <FileText className="w-3 h-3" /> PDF
-      </a>
+        {downloading === "pdf" ? <RefreshCw className="w-3 h-3 animate-spin" /> : <FileText className="w-3 h-3" />} PDF
+      </button>
     </div>
   );
 }
@@ -148,7 +153,7 @@ export default function DatasetsPage() {
                   </div>
 
                   <div className="flex items-center gap-2 flex-wrap shrink-0">
-                    {dataset.status === "ready" && <ExportMenu datasetId={dataset.id} />}
+                    {dataset.status === "ready" && <ExportMenu datasetId={dataset.id} datasetName={dataset.name} />}
                     {dataset.status === "ready" && (
                       <button
                         onClick={() => handleGenerateDashboard(dataset.id, dataset.name)}

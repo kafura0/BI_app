@@ -54,6 +54,7 @@ services:
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
       STRIPE_PRO_PRICE_ID: ${STRIPE_PRO_PRICE_ID:-}
+      STRIPE_ENTERPRISE_PRICE_ID: ${STRIPE_ENTERPRISE_PRICE_ID:-}
     volumes:
       - upload_data:/tmp/bi_uploads
     depends_on:

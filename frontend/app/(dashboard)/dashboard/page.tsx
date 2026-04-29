@@ -7,6 +7,8 @@ import type { Dashboard, Dataset } from "@/types";
 import { MetricsCard } from "@/components/charts/metrics-card";
 import { RevenueChart } from "@/components/charts/revenue-chart";
 import { ForecastChart } from "@/components/charts/forecast-chart";
+import { downloadWithAuth } from "@/lib/download";
+import { useToast } from "@/components/ui/toast";
 
 export default function DashboardPage() {
   const [dashboards, setDashboards] = useState<Dashboard[]>([]);
@@ -15,8 +17,10 @@ export default function DashboardPage() {
   const [dashboardData, setDashboardData] = useState<Record<string, unknown>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const { error: toastError, success: toastSuccess } = useToast();
 
-  const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
   useEffect(() => {
     (async () => {
@@ -44,6 +48,18 @@ export default function DashboardPage() {
       setDashboardData(res.data.widget_data);
     } catch (e) {
       setError(getErrorMessage(e));
+    }
+  };
+
+  const handleExportPdf = async (dashboard: Dashboard) => {
+    setExportingPdf(true);
+    try {
+      await downloadWithAuth(`${BASE_URL}/export/dashboards/${dashboard.id}/pdf`, `${dashboard.name}.pdf`);
+      toastSuccess("PDF exported");
+    } catch {
+      toastError("Failed to export PDF");
+    } finally {
+      setExportingPdf(false);
     }
   };
 
@@ -123,13 +139,13 @@ export default function DashboardPage() {
               >
                 <Pencil className="w-3 h-3" /> Edit
               </Link>
-              <a
-                href={`${base}/export/dashboards/${currentDashboard.id}/pdf`}
-                download
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-medium rounded-lg transition-colors"
+              <button
+                onClick={() => handleExportPdf(currentDashboard)}
+                disabled={exportingPdf}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-400 hover:text-white text-xs font-medium rounded-lg transition-colors"
               >
-                <FileText className="w-3 h-3" /> Export PDF
-              </a>
+                {exportingPdf ? <RefreshCw className="w-3 h-3 animate-spin" /> : <FileText className="w-3 h-3" />} Export PDF
+              </button>
               <button
                 onClick={() => handleDelete(currentDashboard.id)}
                 className="p-1.5 text-slate-600 hover:text-red-400 transition-colors rounded-lg hover:bg-red-400/10"
