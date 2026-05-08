@@ -10,7 +10,12 @@
       "Bash(tasklist /FI \"PID eq 21884\")",
       "Bash(tasklist /FI \"PID eq 22724\")",
       "Bash(powershell *)",
-      "Bash(curl -s http://localhost:8001/health)"
+      "Bash(curl -s http://localhost:8001/health)",
+      "Bash(python3 -c \"import sys; sys.path.insert\\(0, '/c/Users/User/Desktop/startup/BI_app'\\); from backend.app.main import app; print\\('Main app imports successfully'\\)\")",
+      "Bash(grep *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git *)"
     ]
   }
 }
