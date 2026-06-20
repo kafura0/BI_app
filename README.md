@@ -55,9 +55,9 @@ docker compose up --build
 ```
 
 Services start at:
-- Frontend:  http://localhost:3000
-- Backend API: http://localhost:8000
-- API Docs: http://localhost:8000/api/v1/docs
+- Frontend:  http://localhost:3001
+- Backend API: http://localhost:8001
+- API Docs: http://localhost:8001/api/v1/docs
 
 ### 4. Seed demo data
 

@@ -4,14 +4,13 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, Loader2, RefreshCw } from "lucide-react";
 import { dashboardsApi, datasetsApi, getErrorMessage } from "@/lib/api";
-import type { Dashboard, WidgetConfig } from "@/types";
+import type { WidgetConfig } from "@/types";
 import { WidgetGrid } from "@/components/dashboard/widget-grid";
 
 export default function DashboardEditPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
 
-  const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   const [widgets, setWidgets] = useState<WidgetConfig[]>([]);
   const [columns, setColumns] = useState<string[]>([]);
   const [name, setName] = useState("");
@@ -20,23 +19,25 @@ export default function DashboardEditPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
       try {
         const res = await dashboardsApi.getData(id);
+        if (cancelled) return;
         const d = res.data.dashboard;
-        setDashboard(d);
         setWidgets(d.widgets as WidgetConfig[]);
         setName(d.name);
 
-        // Fetch dataset schema to get all available columns (not just the ones already in widgets)
         const dsRes = await datasetsApi.get(d.dataset_id);
+        if (cancelled) return;
         setColumns(dsRes.data.schema_definition.columns.map((c) => c.name));
       } catch (e) {
-        setError(getErrorMessage(e));
+        if (!cancelled) setError(getErrorMessage(e));
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     })();
+    return () => { cancelled = true; };
   }, [id]);
 
   const handleSave = async () => {

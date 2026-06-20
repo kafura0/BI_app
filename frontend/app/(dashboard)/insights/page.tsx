@@ -21,7 +21,7 @@ function InsightCard({ insight }: { insight: Insight }) {
         </div>
         <div>
           <p className="text-slate-400 text-xs mb-1">{formatDate(insight.created_at)} · {insight.model_used} · {insight.tokens_used} tokens</p>
-          <p className="text-slate-300 text-sm italic">"{insight.query}"</p>
+          <p className="text-slate-300 text-sm italic">&ldquo;{insight.query}&rdquo;</p>
         </div>
       </div>
 
@@ -70,17 +70,20 @@ export default function InsightsPage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
       try {
         const [insRes, dsRes] = await Promise.all([insightsApi.list(), datasetsApi.list()]);
+        if (cancelled) return;
         setInsights(insRes.data.items);
         setDatasets(dsRes.data.items.filter((d) => d.status === "ready"));
       } catch (e) {
-        setError(getErrorMessage(e));
+        if (!cancelled) setError(getErrorMessage(e));
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     })();
+    return () => { cancelled = true; };
   }, []);
 
   const handleSubmit = async () => {

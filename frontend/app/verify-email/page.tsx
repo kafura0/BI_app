@@ -14,13 +14,16 @@ function VerifyContent() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
+    let cancelled = false;
     if (!token) { setStatus("error"); setMessage("No verification token provided."); return; }
     authApi.verifyEmail(token)
       .then(() => {
+        if (cancelled) return;
         patchStoredUser({ email_verified: true });
         setStatus("success");
       })
-      .catch((e) => { setStatus("error"); setMessage(getErrorMessage(e)); });
+      .catch((e) => { if (!cancelled) { setStatus("error"); setMessage(getErrorMessage(e)); } });
+    return () => { cancelled = true; };
   }, [token]);
 
   return (

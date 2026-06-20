@@ -15,7 +15,8 @@
       "Bash(grep *)",
       "Bash(git add *)",
       "Bash(git commit *)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash(docker info *)"
     ]
   }
 }

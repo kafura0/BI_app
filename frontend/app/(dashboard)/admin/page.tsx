@@ -33,19 +33,21 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const load = async (days: number) => {
-    setLoading(true);
-    try {
-      const res = await analyticsApi.getUsage(days);
-      setStats(res.data);
-    } catch (e) {
-      setError(getErrorMessage(e));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { load(period); }, [period]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await analyticsApi.getUsage(period);
+        if (cancelled) return;
+        setStats(res.data);
+      } catch (e) {
+        if (!cancelled) setError(getErrorMessage(e));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [period]);
 
   const planBadge: Record<string, string> = {
     free: "bg-slate-700 text-slate-300",

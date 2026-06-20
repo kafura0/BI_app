@@ -1,18 +1,21 @@
 import uuid
 from typing import Annotated
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_db
 from ..middleware.auth import get_current_tenant, TenantContext
+from ..rate_limit import limiter
 from ..services import export_service
 
 router = APIRouter(prefix="/export", tags=["Export"])
 
 
 @router.get("/datasets/{dataset_id}/csv")
+@limiter.limit("10/minute")
 async def export_dataset_as_csv(
+    request: Request,
     dataset_id: uuid.UUID,
     tenant: Annotated[TenantContext, Depends(get_current_tenant)],
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -26,7 +29,9 @@ async def export_dataset_as_csv(
 
 
 @router.get("/datasets/{dataset_id}/pdf")
+@limiter.limit("10/minute")
 async def export_dataset_as_pdf(
+    request: Request,
     dataset_id: uuid.UUID,
     tenant: Annotated[TenantContext, Depends(get_current_tenant)],
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -40,7 +45,9 @@ async def export_dataset_as_pdf(
 
 
 @router.get("/dashboards/{dashboard_id}/pdf")
+@limiter.limit("10/minute")
 async def export_dashboard_as_pdf(
+    request: Request,
     dashboard_id: uuid.UUID,
     tenant: Annotated[TenantContext, Depends(get_current_tenant)],
     db: Annotated[AsyncSession, Depends(get_db)],

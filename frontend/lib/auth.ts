@@ -1,17 +1,14 @@
 import type { User, Organization } from "@/types";
 
 const AUTH_KEY = "auth_state";
-const TOKEN_KEY = "access_token";
 
 export interface StoredAuth {
   user: User;
   organization: Organization;
-  token: string;
 }
 
-export function saveAuth(user: User, organization: Organization, token: string): void {
-  localStorage.setItem(TOKEN_KEY, token);
-  localStorage.setItem(AUTH_KEY, JSON.stringify({ user, organization, token }));
+export function saveAuth(user: User, organization: Organization): void {
+  localStorage.setItem(AUTH_KEY, JSON.stringify({ user, organization }));
 }
 
 export function loadAuth(): StoredAuth | null {
@@ -26,12 +23,11 @@ export function loadAuth(): StoredAuth | null {
 }
 
 export function clearAuth(): void {
-  localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(AUTH_KEY);
 }
 
 export function isAuthenticated(): boolean {
-  return Boolean(loadAuth()?.token);
+  return Boolean(loadAuth()?.user);
 }
 
 export function patchStoredUser(patch: Partial<User>): void {
@@ -39,4 +35,15 @@ export function patchStoredUser(patch: Partial<User>): void {
   if (!auth) return;
   const updated = { ...auth, user: { ...auth.user, ...patch } };
   localStorage.setItem(AUTH_KEY, JSON.stringify(updated));
+}
+
+export async function serverIsAuthenticated(): Promise<boolean> {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"}/auth/me`, {
+      credentials: "include",
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }

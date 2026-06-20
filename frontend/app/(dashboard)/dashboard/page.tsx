@@ -23,22 +23,26 @@ export default function DashboardPage() {
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
       try {
         const [dashRes, dsRes] = await Promise.all([dashboardsApi.list(), datasetsApi.list()]);
+        if (cancelled) return;
         setDashboards(dashRes.data);
         setDatasets(dsRes.data.items);
         if (dashRes.data.length > 0) {
           setActiveDashboard(dashRes.data[0].id);
           const dataRes = await dashboardsApi.getData(dashRes.data[0].id);
+          if (cancelled) return;
           setDashboardData(dataRes.data.widget_data);
         }
       } catch (e) {
-        setError(getErrorMessage(e));
+        if (!cancelled) setError(getErrorMessage(e));
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     })();
+    return () => { cancelled = true; };
   }, []);
 
   const switchDashboard = async (id: string) => {
@@ -193,8 +197,8 @@ export default function DashboardPage() {
           {currentDashboard.widgets
             .filter((w) => w.type === "forecast")
             .map((widget) => {
-              const data = dashboardData[widget.id] as { x: string; value: number; type: string }[] | undefined;
-              return <ForecastChart key={widget.id} title={widget.title} data={data ?? []} />;
+              const data = dashboardData[widget.id] as { data: { x: string; value: number; type: "actual" | "forecast" }[]; r2: number; periods: number } | undefined;
+              return <ForecastChart key={widget.id} title={widget.title} data={data ?? { data: [], r2: 0, periods: 0 }} />;
             })}
         </>
       )}

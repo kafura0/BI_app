@@ -11,9 +11,9 @@ interface ToastItem {
 }
 
 interface ToastContextValue {
-  toast: (message: string, type?: ToastType) => void;
-  success: (message: string) => void;
-  error: (message: string) => void;
+  toast: (_message: string, _type?: ToastType) => void;
+  success: (_message: string) => void;
+  error: (_message: string) => void;
 }
 
 const ToastContext = createContext<ToastContextValue | null>(null);
@@ -25,7 +25,7 @@ const STYLES: Record<ToastType, string> = {
   info: "bg-slate-800 border-slate-700 text-slate-100",
 };
 
-function ToastEntry({ item, onDismiss }: { item: ToastItem; onDismiss: (id: string) => void }) {
+function ToastEntry({ item, onDismiss }: { item: ToastItem; onDismiss: (_id: string) => void }) {
   const Icon = ICONS[item.type];
   return (
     <div className={`flex items-start gap-3 px-4 py-3 rounded-xl border shadow-2xl w-full ${STYLES[item.type]}`}>

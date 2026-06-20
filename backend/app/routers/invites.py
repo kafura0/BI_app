@@ -1,7 +1,7 @@
 import uuid
 from typing import Annotated
 from pydantic import BaseModel, EmailStr
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -10,6 +10,7 @@ from ..middleware.auth import require_admin, get_current_tenant, TenantContext
 from ..models.organization import Organization, Membership, MemberRole
 from ..models.invite import Invite, InviteStatus
 from ..models.user import User
+from ..rate_limit import limiter
 from ..services import invite_service
 
 router = APIRouter(prefix="/invites", tags=["Team Invites"])
@@ -42,7 +43,9 @@ class MemberOut(BaseModel):
 
 
 @router.post("", response_model=dict, status_code=201)
+@limiter.limit("10/minute")
 async def create_invite(
+    request: Request,
     data: InviteCreate,
     tenant: Annotated[TenantContext, Depends(require_admin)],
     db: Annotated[AsyncSession, Depends(get_db)],

@@ -1,6 +1,6 @@
 import uuid
 from typing import Annotated
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Request, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
@@ -9,13 +9,16 @@ from ..middleware.auth import get_current_tenant, TenantContext
 from ..models.insight import Insight
 from ..models.organization import Organization
 from ..schemas.insight import InsightRequest, InsightOut, InsightListOut
+from ..rate_limit import limiter
 from ..services import analytics_service
 
 router = APIRouter(prefix="/insights", tags=["AI Insights"])
 
 
 @router.post("", response_model=InsightOut, status_code=201)
+@limiter.limit("30/minute")
 async def create_insight(
+    request: Request,
     data: InsightRequest,
     tenant: Annotated[TenantContext, Depends(get_current_tenant)],
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -25,10 +28,7 @@ async def create_insight(
     org = org_result.scalar_one()
     await analytics_service.check_daily_query_limit(db, tenant.organization_id, org)
 
-    # Lazy import to keep startup fast
-    import sys, os
-    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../../ai-engine"))
-    from services.insight_service import generate_insight  # type: ignore
+    from services.insight_service import generate_insight
 
     sample_df = None
     if data.dataset_id:

@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, Response, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,7 +15,42 @@ from ..models.organization import Membership, MemberRole
 from ..schemas.auth import TokenPayload
 
 settings = get_settings()
-bearer_scheme = HTTPBearer()
+bearer_scheme = HTTPBearer(auto_error=False)
+
+COOKIE_NAME = "access_token"
+COOKIE_PATH = settings.API_V1_PREFIX.rstrip("v1").rstrip("/") or "/"
+COOKIE_MAX_AGE = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+
+
+def set_auth_cookie(response: Response, token: str) -> None:
+    response.set_cookie(
+        key=COOKIE_NAME,
+        value=token,
+        max_age=COOKIE_MAX_AGE,
+        httponly=True,
+        samesite="lax",
+        secure=False,  # set True in production with HTTPS
+        path=COOKIE_PATH,
+    )
+
+
+def clear_auth_cookie(response: Response) -> None:
+    response.delete_cookie(key=COOKIE_NAME, path=COOKIE_PATH)
+
+
+def _extract_token(request: Request, credentials: HTTPAuthorizationCredentials | None) -> str:
+    # Try cookie first
+    token = request.cookies.get(COOKIE_NAME)
+    if token:
+        return token
+    # Fall back to Authorization header
+    if credentials:
+        return credentials.credentials
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Not authenticated",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
 
 def create_access_token(user_id: uuid.UUID, organization_id: uuid.UUID, role: MemberRole) -> tuple[str, int]:
@@ -61,10 +96,12 @@ class TenantContext:
 
 
 async def get_current_tenant(
-    credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)],
+    request: Request,
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> TenantContext:
-    payload = decode_token(credentials.credentials)
+    token = _extract_token(request, credentials)
+    payload = decode_token(token)
 
     user_id = uuid.UUID(payload.sub)
     org_id = uuid.UUID(payload.org)

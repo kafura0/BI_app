@@ -32,7 +32,22 @@ export default function TeamPage() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [membersRes, invitesRes] = await Promise.all([teamApi.listMembers(), teamApi.listInvites()]);
+        if (cancelled) return;
+        setMembers(membersRes.data);
+        setInvites(invitesRes.data);
+      } catch (e) {
+        if (!cancelled) setError(getErrorMessage(e));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const handleInvite = async () => {
     if (!inviteEmail) return;
@@ -144,7 +159,6 @@ export default function TeamPage() {
             </div>
             {members.map((member, i) => {
               const roleConf = ROLE_CONFIG[member.role as keyof typeof ROLE_CONFIG] ?? ROLE_CONFIG.viewer;
-              const RoleIcon = roleConf.icon;
               return (
                 <div key={member.user_id} className={`flex items-center gap-4 px-5 py-4 ${i < members.length - 1 ? "border-b border-slate-800" : ""}`}>
                   <div className="w-9 h-9 bg-slate-700 rounded-full flex items-center justify-center shrink-0">

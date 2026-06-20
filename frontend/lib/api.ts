@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosInstance } from "axios";
 import type {
   Dataset,
   Dashboard,
@@ -15,21 +15,13 @@ function createApiClient(): AxiosInstance {
     baseURL: BASE_URL,
     headers: { "Content-Type": "application/json" },
     timeout: 30_000,
-  });
-
-  client.interceptors.request.use((config) => {
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("access_token");
-      if (token) config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
+    withCredentials: true,
   });
 
   client.interceptors.response.use(
-    (res: AxiosResponse) => res,
+    (res) => res,
     (error: AxiosError) => {
       if (error.response?.status === 401 && typeof window !== "undefined") {
-        localStorage.removeItem("access_token");
         localStorage.removeItem("auth_state");
         window.location.href = "/login";
       }

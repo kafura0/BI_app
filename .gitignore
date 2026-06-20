@@ -14,12 +14,14 @@ node_modules/
 out/
 .cache/
 *.tsbuildinfo
+next-env.d.ts
 
 # Env
 .env
 .env.local
 .env.*.local
 !.env.example
+docker/.env
 
 # Uploads
 /tmp/

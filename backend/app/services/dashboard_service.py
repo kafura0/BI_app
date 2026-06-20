@@ -121,12 +121,13 @@ def _compute_widget_data(df: pd.DataFrame, widget: dict) -> Any:
             df[y_col] = pd.to_numeric(df[y_col], errors="coerce")
             df[x_col] = pd.to_datetime(df[x_col], errors="coerce")
             ts = df.groupby(x_col)[y_col].agg(agg_fn).reset_index().dropna().sort_values(x_col)
-            # Simple linear regression forecast
             from sklearn.linear_model import LinearRegression
+            from sklearn.metrics import r2_score
             import numpy as np
             X = np.arange(len(ts)).reshape(-1, 1)
             y = ts[y_col].values
             model = LinearRegression().fit(X, y)
+            r2 = round(r2_score(y, model.predict(X)), 4)
             future_X = np.arange(len(ts), len(ts) + 6).reshape(-1, 1)
             forecast = model.predict(future_X)
             history = [{"x": str(r[x_col].date()), "value": float(r[y_col]), "type": "actual"} for _, r in ts.iterrows()]
@@ -134,7 +135,7 @@ def _compute_widget_data(df: pd.DataFrame, widget: dict) -> Any:
             freq = pd.infer_freq(ts[x_col]) or "M"
             future_dates = pd.date_range(start=last_date, periods=7, freq=freq)[1:]
             predicted = [{"x": str(d.date()), "value": round(float(v), 2), "type": "forecast"} for d, v in zip(future_dates, forecast)]
-            return history + predicted
+            return {"data": history + predicted, "r2": r2, "periods": len(ts)}
         except Exception:
             return []
 

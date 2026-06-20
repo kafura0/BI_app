@@ -83,5 +83,4 @@ class TokenPayload(BaseModel):
 class RegisterResponse(BaseModel):
     user: UserOut
     organization: OrganizationOut
-    token: Token
     role: str = "admin"

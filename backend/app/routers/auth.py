@@ -1,13 +1,14 @@
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from ..database import get_db
-from ..middleware.auth import get_current_tenant, TenantContext
+from ..middleware.auth import get_current_tenant, TenantContext, set_auth_cookie, clear_auth_cookie
 from ..models.user import User
+from ..rate_limit import limiter
 from ..schemas.auth import UserCreate, UserLogin, RegisterResponse, UserOut
 from ..services.auth_service import register_user, login_user
 from ..services.email_service import send_verification_email, send_welcome_email
@@ -18,12 +19,15 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 @router.post("/register", response_model=RegisterResponse, status_code=201)
+@limiter.limit("5/minute")
 async def register(
+    request: Request,
     data: UserCreate,
+    response: Response,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> RegisterResponse:
-    result = await register_user(db, data)
-    # Send verification email async (non-blocking)
+    result, token = await register_user(db, data)
+    set_auth_cookie(response, token)
     import asyncio
     asyncio.create_task(
         send_verification_email(result.user.email, result.user.full_name, result.organization.name, _make_verify_token(result.user.id))
@@ -32,11 +36,25 @@ async def register(
 
 
 @router.post("/login", response_model=RegisterResponse)
+@limiter.limit("10/minute")
 async def login(
+    request: Request,
     data: UserLogin,
+    response: Response,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> RegisterResponse:
-    return await login_user(db, data.email, data.password)
+    result, token = await login_user(db, data.email, data.password)
+    set_auth_cookie(response, token)
+    return result
+
+
+@router.post("/logout")
+async def logout(
+    response: Response,
+    tenant: Annotated[TenantContext, Depends(get_current_tenant)],
+) -> dict:
+    clear_auth_cookie(response)
+    return {"message": "Logged out"}
 
 
 @router.get("/verify-email")

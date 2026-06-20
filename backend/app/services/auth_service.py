@@ -7,7 +7,7 @@ from passlib.context import CryptContext
 
 from ..models.user import User
 from ..models.organization import Organization, Membership, MemberRole, PlanType
-from ..schemas.auth import UserCreate, UserOut, OrganizationOut, Token, RegisterResponse
+from ..schemas.auth import UserCreate, UserOut, OrganizationOut, RegisterResponse
 from ..middleware.auth import create_access_token
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -21,13 +21,11 @@ def verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
 
 
-async def register_user(db: AsyncSession, data: UserCreate) -> RegisterResponse:
-    # Check email uniqueness
+async def register_user(db: AsyncSession, data: UserCreate) -> tuple[RegisterResponse, str]:
     existing = await db.execute(select(User).where(User.email == data.email.lower()))
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
 
-    # Check slug uniqueness
     existing_org = await db.execute(select(Organization).where(Organization.slug == data.organization.slug))
     if existing_org.scalar_one_or_none():
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Organization slug already taken")
@@ -38,7 +36,7 @@ async def register_user(db: AsyncSession, data: UserCreate) -> RegisterResponse:
         full_name=data.full_name,
     )
     db.add(user)
-    await db.flush()  # get user.id
+    await db.flush()
 
     org = Organization(
         name=data.organization.name,
@@ -61,12 +59,11 @@ async def register_user(db: AsyncSession, data: UserCreate) -> RegisterResponse:
     return RegisterResponse(
         user=UserOut.model_validate(user),
         organization=OrganizationOut.model_validate(org),
-        token=Token(access_token=token_str, expires_in=expires_in),
         role=MemberRole.admin.value,
-    )
+    ), token_str
 
 
-async def login_user(db: AsyncSession, email: str, password: str) -> RegisterResponse:
+async def login_user(db: AsyncSession, email: str, password: str) -> tuple[RegisterResponse, str]:
     result = await db.execute(select(User).where(User.email == email.lower(), User.is_active == True))  # noqa: E712
     user = result.scalar_one_or_none()
     if not user or not verify_password(password, user.hashed_password):
@@ -91,6 +88,5 @@ async def login_user(db: AsyncSession, email: str, password: str) -> RegisterRes
     return RegisterResponse(
         user=UserOut.model_validate(user),
         organization=OrganizationOut.model_validate(org),
-        token=Token(access_token=token_str, expires_in=expires_in),
         role=membership.role.value,
-    )
+    ), token_str

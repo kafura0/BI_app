@@ -1,6 +1,6 @@
 import uuid
 from typing import Annotated
-from fastapi import APIRouter, Depends, File, Form, UploadFile, Query
+from fastapi import APIRouter, Depends, File, Form, Request, UploadFile, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -9,13 +9,16 @@ from ..middleware.auth import get_current_tenant, require_analyst, TenantContext
 from ..models.organization import Organization
 from ..models.dataset import Dataset
 from ..schemas.dataset import DatasetOut, DatasetListOut
+from ..rate_limit import limiter
 from ..services import dataset_service, analytics_service
 
 router = APIRouter(prefix="/datasets", tags=["Datasets"])
 
 
 @router.post("", response_model=DatasetOut, status_code=201)
+@limiter.limit("5/minute")
 async def upload_dataset(
+    request: Request,
     tenant: Annotated[TenantContext, Depends(require_analyst)],
     db: Annotated[AsyncSession, Depends(get_db)],
     file: UploadFile = File(...),

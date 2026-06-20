@@ -61,18 +61,21 @@ export default function DatasetsPage() {
   const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState<string | null>(null);
 
-  const load = async () => {
-    try {
-      const res = await datasetsApi.list();
-      setDatasets(res.data.items);
-    } catch (e) {
-      setError(getErrorMessage(e));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await datasetsApi.list();
+        if (cancelled) return;
+        setDatasets(res.data.items);
+      } catch (e) {
+        if (!cancelled) setError(getErrorMessage(e));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this dataset and all associated dashboards?")) return;

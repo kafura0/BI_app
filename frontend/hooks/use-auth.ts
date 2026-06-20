@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { authApi, getErrorMessage } from "@/lib/api";
+import { authApi, apiClient, getErrorMessage } from "@/lib/api";
 import { saveAuth, loadAuth, clearAuth, type StoredAuth } from "@/lib/auth";
 import type { User, Organization } from "@/types";
 
@@ -10,14 +10,14 @@ interface UseAuthReturn {
   organization: Organization | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string, redirectTo?: string) => Promise<void>;
-  register: (data: {
+  login: (_email: string, _password: string, _redirectTo?: string) => Promise<void>;
+  register: (_data: {
     email: string;
     password: string;
     full_name: string;
     organization: { name: string; slug: string };
   }) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   error: string | null;
 }
 
@@ -39,9 +39,8 @@ export function useAuth(): UseAuthReturn {
       const stored: StoredAuth = {
         user: { ...data.user, role: data.role as User["role"] },
         organization: data.organization,
-        token: data.token.access_token,
       };
-      saveAuth(stored.user, stored.organization, stored.token);
+      saveAuth(stored.user, stored.organization);
       setAuth(stored);
       router.push(redirectTo);
     } catch (e) {
@@ -59,9 +58,8 @@ export function useAuth(): UseAuthReturn {
       const stored: StoredAuth = {
         user: { ...resp.user, role: resp.role as User["role"] },
         organization: resp.organization,
-        token: resp.token.access_token,
       };
-      saveAuth(stored.user, stored.organization, stored.token);
+      saveAuth(stored.user, stored.organization);
       setAuth(stored);
       router.push("/dashboard");
     } catch (e) {
@@ -71,7 +69,12 @@ export function useAuth(): UseAuthReturn {
     }
   }, [router]);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      await apiClient.post("/auth/logout");
+    } catch {
+      // ignore
+    }
     clearAuth();
     setAuth(null);
     router.push("/login");
@@ -81,7 +84,7 @@ export function useAuth(): UseAuthReturn {
     user: auth?.user ?? null,
     organization: auth?.organization ?? null,
     isLoading,
-    isAuthenticated: Boolean(auth?.token),
+    isAuthenticated: Boolean(auth?.user),
     login,
     register,
     logout,

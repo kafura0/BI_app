@@ -3,73 +3,25 @@ Async email service using SMTP.
 Falls back to console logging when SMTP is not configured (dev mode).
 """
 import logging
+import os
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import Any
 
 import aiosmtplib
-from jinja2 import Environment, BaseLoader
+from jinja2 import Environment, FileSystemLoader
 
 from ..config import get_settings
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
 
-# Inline templates — in production move to a templates/ directory
-_TEMPLATES: dict[str, str] = {
-    "verify_email": """
-<!DOCTYPE html>
-<html>
-<body style="font-family: Inter, sans-serif; background: #0f172a; color: #f1f5f9; padding: 40px;">
-  <div style="max-width: 480px; margin: 0 auto; background: #1e293b; border-radius: 12px; padding: 32px;">
-    <h2 style="color: #6366f1; margin-top: 0;">Verify your email</h2>
-    <p>Hi {{ full_name }},</p>
-    <p>Click the button below to verify your email address for <strong>{{ org_name }}</strong>.</p>
-    <a href="{{ verify_url }}" style="display: inline-block; background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin: 16px 0;">
-      Verify Email
-    </a>
-    <p style="color: #64748b; font-size: 13px;">This link expires in {{ expire_hours }} hours. If you didn't sign up, ignore this email.</p>
-  </div>
-</body>
-</html>
-""",
-    "invite_member": """
-<!DOCTYPE html>
-<html>
-<body style="font-family: Inter, sans-serif; background: #0f172a; color: #f1f5f9; padding: 40px;">
-  <div style="max-width: 480px; margin: 0 auto; background: #1e293b; border-radius: 12px; padding: 32px;">
-    <h2 style="color: #6366f1; margin-top: 0;">You've been invited</h2>
-    <p><strong>{{ invited_by }}</strong> has invited you to join <strong>{{ org_name }}</strong> on BI Platform as <strong>{{ role }}</strong>.</p>
-    <a href="{{ invite_url }}" style="display: inline-block; background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin: 16px 0;">
-      Accept Invitation
-    </a>
-    <p style="color: #64748b; font-size: 13px;">This invitation expires in {{ expire_hours }} hours.</p>
-  </div>
-</body>
-</html>
-""",
-    "welcome": """
-<!DOCTYPE html>
-<html>
-<body style="font-family: Inter, sans-serif; background: #0f172a; color: #f1f5f9; padding: 40px;">
-  <div style="max-width: 480px; margin: 0 auto; background: #1e293b; border-radius: 12px; padding: 32px;">
-    <h2 style="color: #6366f1; margin-top: 0;">Welcome to BI Platform!</h2>
-    <p>Hi {{ full_name }},</p>
-    <p>Your workspace <strong>{{ org_name }}</strong> is ready. Start by uploading a dataset and generating your first AI-powered dashboard.</p>
-    <a href="{{ app_url }}/datasets" style="display: inline-block; background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin: 16px 0;">
-      Get Started
-    </a>
-  </div>
-</body>
-</html>
-""",
-}
-
-_jinja_env = Environment(loader=BaseLoader())
+_template_dir = os.path.join(os.path.dirname(__file__), "../templates/email")
+_jinja_env = Environment(loader=FileSystemLoader(_template_dir))
 
 
 def _render(template_name: str, **kwargs: Any) -> str:
-    tmpl = _jinja_env.from_string(_TEMPLATES[template_name])
+    tmpl = _jinja_env.get_template(f"{template_name}.html")
     return tmpl.render(**kwargs)
 
 

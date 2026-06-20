@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Check, Loader2, ExternalLink, CheckCircle, XCircle } from "lucide-react";
 import { billingApi, getErrorMessage } from "@/lib/api";

@@ -18,9 +18,16 @@ interface ForecastDataPoint {
   type: "actual" | "forecast";
 }
 
-export function ForecastChart({ title, data }: { title: string; data: ForecastDataPoint[] }) {
-  const actual = data.filter((d) => d.type === "actual").map((d) => ({ x: d.x, actual: d.value }));
-  const forecast = data.filter((d) => d.type === "forecast").map((d) => ({ x: d.x, forecast: d.value }));
+interface ForecastResult {
+  data: ForecastDataPoint[];
+  r2: number;
+  periods: number;
+}
+
+export function ForecastChart({ title, data }: { title: string; data: ForecastResult }) {
+  const points = data.data ?? [];
+  const actual = points.filter((d) => d.type === "actual").map((d) => ({ x: d.x, actual: d.value }));
+  const forecast = points.filter((d) => d.type === "forecast").map((d) => ({ x: d.x, forecast: d.value }));
   const combined = [...actual, ...forecast];
   const splitDate = actual[actual.length - 1]?.x;
 
@@ -28,11 +35,16 @@ export function ForecastChart({ title, data }: { title: string; data: ForecastDa
     <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-white font-semibold">{title}</h3>
-        <span className="text-xs px-2 py-1 bg-emerald-600/20 text-emerald-400 rounded-full border border-emerald-600/20 font-medium">
-          AI Forecast
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs px-2 py-1 bg-slate-800 text-slate-400 rounded-full border border-slate-700 font-medium">
+            R²: {data.r2.toFixed(4)}
+          </span>
+          <span className="text-xs px-2 py-1 bg-emerald-600/20 text-emerald-400 rounded-full border border-emerald-600/20 font-medium">
+            AI Forecast
+          </span>
+        </div>
       </div>
-      {data.length === 0 ? (
+      {points.length === 0 ? (
         <div className="h-48 flex items-center justify-center text-slate-500 text-sm">Insufficient data for forecasting</div>
       ) : (
         <ResponsiveContainer width="100%" height={220}>

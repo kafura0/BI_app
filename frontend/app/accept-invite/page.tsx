@@ -15,12 +15,14 @@ function AcceptContent() {
   const loggedIn = isAuthenticated();
 
   useEffect(() => {
+    let cancelled = false;
     if (!token) { setStatus("error"); setMessage("No invite token provided."); return; }
     if (!loggedIn) return;
     setStatus("loading");
     teamApi.acceptInvite(token)
-      .then(() => { setStatus("success"); setTimeout(() => router.push("/dashboard"), 2000); })
-      .catch((e) => { setStatus("error"); setMessage(getErrorMessage(e)); });
+      .then(() => { if (!cancelled) { setStatus("success"); setTimeout(() => router.push("/dashboard"), 2000); } })
+      .catch((e) => { if (!cancelled) { setStatus("error"); setMessage(getErrorMessage(e)); } });
+    return () => { cancelled = true; };
   }, [token, loggedIn, router]);
 
   return (
