@@ -5,6 +5,9 @@ import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { Plus, Trash2, GripVertical } from "lucide-react";
 import type { WidgetConfig } from "@/types";
+import { RevenueChart } from "@/components/charts/revenue-chart";
+import { MetricsCard } from "@/components/charts/metrics-card";
+import { ForecastChart } from "@/components/charts/forecast-chart";
 
 const WIDGET_TYPE_LABELS: Record<WidgetConfig["type"], string> = {
   line_chart: "Line Chart",
@@ -22,6 +25,7 @@ interface WidgetGridProps {
   columns: string[];
   onChange: (_widgets: WidgetConfig[]) => void;
   readOnly?: boolean;
+  widgetData?: Record<string, unknown>;
 }
 
 interface AddWidgetModalProps {
@@ -110,7 +114,7 @@ function AddWidgetModal({ columns, onAdd, onClose }: AddWidgetModalProps) {
   );
 }
 
-export function WidgetGrid({ widgets, columns, onChange, readOnly = false }: WidgetGridProps) {
+export function WidgetGrid({ widgets, columns, onChange, readOnly = false, widgetData }: WidgetGridProps) {
   const [showAddModal, setShowAddModal] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(800);
@@ -222,14 +226,43 @@ export function WidgetGrid({ widgets, columns, onChange, readOnly = false }: Wid
                   </button>
                 )}
               </div>
-              <div className="flex-1 flex items-center justify-center text-slate-600 text-xs p-4">
-                <div className="text-center">
-                  <div className="w-8 h-8 rounded-lg mx-auto mb-2 flex items-center justify-center" style={{ backgroundColor: `${widget.color}20` }}>
-                    <div className="w-3 h-3 rounded" style={{ backgroundColor: widget.color }} />
+              <div className="flex-1 min-h-0 p-2">
+                {widget.type === "metric_card" ? (
+                  <MetricsCard
+                    title={widget.title}
+                    value={(widgetData?.[widget.id] as { value: number } | undefined)?.value ?? 0}
+                    color={widget.color}
+                  />
+                ) : widget.type === "line_chart" ? (
+                  <RevenueChart
+                    title={widget.title}
+                    data={(widgetData?.[widget.id] as Array<{ x: string; value: number }> | undefined) ?? []}
+                    type="line"
+                    color={widget.color}
+                  />
+                ) : widget.type === "bar_chart" ? (
+                  <RevenueChart
+                    title={widget.title}
+                    data={(widgetData?.[widget.id] as Array<{ x: string; value: number }> | undefined) ?? []}
+                    type="bar"
+                    color={widget.color}
+                  />
+                ) : widget.type === "forecast" ? (
+                  <ForecastChart
+                    title={widget.title}
+                    data={(widgetData?.[widget.id] as { data: Array<{ x: string; value: number; type: string }>; r2: number; periods: number } | undefined) ?? { data: [], r2: 0, periods: 0 }}
+                  />
+                ) : (
+                  <div className="flex-1 flex items-center justify-center text-slate-600 text-xs p-4">
+                    <div className="text-center">
+                      <div className="w-8 h-8 rounded-lg mx-auto mb-2 flex items-center justify-center" style={{ backgroundColor: `${widget.color}20` }}>
+                        <div className="w-3 h-3 rounded" style={{ backgroundColor: widget.color }} />
+                      </div>
+                      <p className="text-slate-500">{widget.y_column ?? "—"}</p>
+                      {widget.x_column && <p className="text-slate-700 text-xs mt-0.5">by {widget.x_column}</p>}
+                    </div>
                   </div>
-                  <p className="text-slate-500">{widget.y_column ?? "—"}</p>
-                  {widget.x_column && <p className="text-slate-700 text-xs mt-0.5">by {widget.x_column}</p>}
-                </div>
+                )}
               </div>
             </div>
           ))}

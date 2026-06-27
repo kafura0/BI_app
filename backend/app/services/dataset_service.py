@@ -192,16 +192,20 @@ async def get_dataset_sample(db: AsyncSession, dataset_id: uuid.UUID, organizati
 
 
 async def list_datasets(
-    db: AsyncSession, organization_id: uuid.UUID, page: int = 1, page_size: int = 20
+    db: AsyncSession, organization_id: uuid.UUID, page: int = 1, page_size: int = 20, q: str | None = None
 ) -> DatasetListOut:
     offset = (page - 1) * page_size
+    base_filter = Dataset.organization_id == organization_id
+    if q:
+        search_pattern = f"%{q}%"
+        base_filter = base_filter & (Dataset.name.ilike(search_pattern) | Dataset.description.ilike(search_pattern))
     count_result = await db.execute(
-        select(func.count()).where(Dataset.organization_id == organization_id)
+        select(func.count()).where(base_filter)
     )
     total = count_result.scalar_one()
     result = await db.execute(
         select(Dataset)
-        .where(Dataset.organization_id == organization_id)
+        .where(base_filter)
         .order_by(Dataset.created_at.desc())
         .offset(offset)
         .limit(page_size)

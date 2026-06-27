@@ -1,13 +1,13 @@
 import uuid
 from typing import Annotated
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 
 from ..database import get_db
 from ..middleware.auth import get_current_tenant, require_analyst, TenantContext
 from ..models.dashboard import Dashboard
-from ..schemas.dashboard import DashboardOut, DashboardCreate, DashboardUpdate, DashboardDataOut
+from ..schemas.dashboard import DashboardOut, DashboardCreate, DashboardUpdate, DashboardDataOut, DashboardListOut
 from ..services import dashboard_service, analytics_service
 
 router = APIRouter(prefix="/dashboards", tags=["Dashboards"])
@@ -38,17 +38,33 @@ async def create_dashboard(
         return await dashboard_service.auto_create_dashboard(db, tenant.organization_id, data.dataset_id, tenant.user_id, data.name)
 
 
-@router.get("", response_model=list[DashboardOut])
+@router.get("", response_model=DashboardListOut)
 async def list_dashboards(
     tenant: Annotated[TenantContext, Depends(get_current_tenant)],
     db: Annotated[AsyncSession, Depends(get_db)],
-) -> list[DashboardOut]:
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+) -> DashboardListOut:
+    base_filter = Dashboard.organization_id == tenant.organization_id
+    count_result = await db.execute(
+        select(func.count()).where(base_filter)
+    )
+    total = count_result.scalar_one()
+    offset = (page - 1) * page_size
     result = await db.execute(
         select(Dashboard)
-        .where(Dashboard.organization_id == tenant.organization_id)
+        .where(base_filter)
         .order_by(Dashboard.created_at.desc())
+        .offset(offset)
+        .limit(page_size)
     )
-    return [DashboardOut.model_validate(d) for d in result.scalars().all()]
+    dashboards = result.scalars().all()
+    return DashboardListOut(
+        items=[DashboardOut.model_validate(d) for d in dashboards],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
 
 
 @router.get("/{dashboard_id}/data", response_model=DashboardDataOut)

@@ -1,4 +1,4 @@
-version: "3.9"
+name: bi-saas
 
 services:
   postgres:
@@ -17,6 +17,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - internal
 
   redis:
     image: redis:7-alpine
@@ -26,14 +28,16 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    networks:
+      - internal
 
   backend:
     build:
       context: ..          # repo root so Dockerfile can reach both /backend and /ai-engine
       dockerfile: backend/Dockerfile
     restart: unless-stopped
-    ports:
-      - "8001:8000"
+    expose:
+      - "8000"
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:${POSTGRES_PASSWORD:-changeme}@postgres:5432/bi_saas
       SYNC_DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-changeme}@postgres:5432/bi_saas
@@ -67,6 +71,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    networks:
+      - internal
 
   frontend:
     build:
@@ -75,13 +81,41 @@ services:
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8001/api/v1}
     restart: unless-stopped
-    ports:
-      - "3001:3000"
+    expose:
+      - "3000"
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8001/api/v1}
     depends_on:
       - backend
+    networks:
+      - internal
+
+  caddy:
+    image: caddy:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+      API_DOMAIN: ${API_DOMAIN:-localhost}
+      CADDY_EMAIL: ${CADDY_EMAIL:-admin@example.com}
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - internal
 
 volumes:
   postgres_data:
   upload_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  internal:
+    driver: bridge

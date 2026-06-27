@@ -2,7 +2,7 @@ import uuid
 from typing import Annotated
 from fastapi import APIRouter, Depends, Request, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, or_
 
 from ..database import get_db
 from ..middleware.auth import get_current_tenant, TenantContext
@@ -66,15 +66,19 @@ async def list_insights(
     db: Annotated[AsyncSession, Depends(get_db)],
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=50),
+    q: str | None = Query(None),
 ) -> InsightListOut:
     offset = (page - 1) * page_size
+    base_filter = Insight.organization_id == tenant.organization_id
+    if q:
+        base_filter = base_filter & Insight.query.ilike(f"%{q}%")
     count_result = await db.execute(
-        select(func.count()).where(Insight.organization_id == tenant.organization_id)
+        select(func.count()).where(base_filter)
     )
     total = count_result.scalar_one()
     result = await db.execute(
         select(Insight)
-        .where(Insight.organization_id == tenant.organization_id)
+        .where(base_filter)
         .order_by(Insight.created_at.desc())
         .offset(offset)
         .limit(page_size)

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
-import { Send, Loader2, Sparkles, TrendingUp, TrendingDown, Minus, Database } from "lucide-react";
+import { Send, Loader2, Sparkles, TrendingUp, TrendingDown, Minus, Database, Search, X } from "lucide-react";
 import { insightsApi, datasetsApi, getErrorMessage } from "@/lib/api";
 import type { Insight, Dataset, KeyMetric } from "@/types";
 import { formatDate, getTrendColor } from "@/lib/utils";
@@ -67,24 +67,33 @@ export default function InsightsPage() {
   const [loading, setLoading] = useState(true);
   const [querying, setQuerying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const loadData = async (q: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [insRes, dsRes] = await Promise.all([insightsApi.list(1, q || undefined), datasetsApi.list()]);
+      setInsights(insRes.data.items);
+      setDatasets(dsRes.data.items.filter((d) => d.status === "ready"));
+    } catch (e) {
+      setError(getErrorMessage(e));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const [insRes, dsRes] = await Promise.all([insightsApi.list(), datasetsApi.list()]);
-        if (cancelled) return;
-        setInsights(insRes.data.items);
-        setDatasets(dsRes.data.items.filter((d) => d.status === "ready"));
-      } catch (e) {
-        if (!cancelled) setError(getErrorMessage(e));
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
+    loadData("");
   }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadData(search);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const handleSubmit = async () => {
     const q = query.trim();
@@ -164,6 +173,21 @@ export default function InsightsPage() {
       {error && (
         <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">{error}</div>
       )}
+
+      <div className="relative mb-4">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search insights..."
+          className="w-full pl-10 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+        {search && (
+          <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
 
       {loading ? (
         <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 text-indigo-400 animate-spin" /></div>

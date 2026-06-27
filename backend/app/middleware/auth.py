@@ -18,24 +18,36 @@ settings = get_settings()
 bearer_scheme = HTTPBearer(auto_error=False)
 
 COOKIE_NAME = "access_token"
+REFRESH_COOKIE_NAME = "refresh_token"
 COOKIE_PATH = settings.API_V1_PREFIX.rstrip("v1").rstrip("/") or "/"
 COOKIE_MAX_AGE = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+REFRESH_COOKIE_MAX_AGE = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600
 
 
-def set_auth_cookie(response: Response, token: str) -> None:
+def set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:
     response.set_cookie(
         key=COOKIE_NAME,
-        value=token,
+        value=access_token,
         max_age=COOKIE_MAX_AGE,
         httponly=True,
         samesite="lax",
-        secure=False,  # set True in production with HTTPS
+        secure=False,
+        path=COOKIE_PATH,
+    )
+    response.set_cookie(
+        key=REFRESH_COOKIE_NAME,
+        value=refresh_token,
+        max_age=REFRESH_COOKIE_MAX_AGE,
+        httponly=True,
+        samesite="lax",
+        secure=False,
         path=COOKIE_PATH,
     )
 
 
-def clear_auth_cookie(response: Response) -> None:
+def clear_auth_cookies(response: Response) -> None:
     response.delete_cookie(key=COOKIE_NAME, path=COOKIE_PATH)
+    response.delete_cookie(key=REFRESH_COOKIE_NAME, path=COOKIE_PATH)
 
 
 def _extract_token(request: Request, credentials: HTTPAuthorizationCredentials | None) -> str:
@@ -67,6 +79,21 @@ def create_access_token(user_id: uuid.UUID, organization_id: uuid.UUID, role: Me
     return token, settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
 
 
+def create_refresh_token(user_id: uuid.UUID, organization_id: uuid.UUID, role: MemberRole) -> tuple[str, int]:
+    expires_delta = timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    expire = datetime.now(timezone.utc) + expires_delta
+    payload = {
+        "sub": str(user_id),
+        "org": str(organization_id),
+        "role": role.value,
+        "type": "refresh",
+        "exp": int(expire.timestamp()),
+        "iat": int(datetime.now(timezone.utc).timestamp()),
+    }
+    token = jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return token, REFRESH_COOKIE_MAX_AGE
+
+
 def decode_token(token: str) -> TokenPayload:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
@@ -76,6 +103,19 @@ def decode_token(token: str) -> TokenPayload:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+def decode_refresh_token(token: str) -> dict:
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        if payload.get("type") != "refresh":
+            raise JWTError("Not a refresh token")
+        return payload
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired refresh token",
         )
 
 
@@ -125,6 +165,22 @@ async def get_current_tenant(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Membership not found")
 
     return TenantContext(user_id=user_id, organization_id=org_id, role=membership.role)
+
+
+class RefreshTokenContext:
+    """Like TenantContext but without DB validation — just from the refresh token."""
+    def __init__(self, user_id: uuid.UUID, organization_id: uuid.UUID, role: MemberRole):
+        self.user_id = user_id
+        self.organization_id = organization_id
+        self.role = role
+
+    @property
+    def is_admin(self) -> bool:
+        return self.role == MemberRole.admin
+
+    @property
+    def is_analyst(self) -> bool:
+        return self.role in (MemberRole.admin, MemberRole.analyst)
 
 
 def require_admin(tenant: Annotated[TenantContext, Depends(get_current_tenant)]) -> TenantContext:

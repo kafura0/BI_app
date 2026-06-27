@@ -117,6 +117,28 @@ async def get_usage_stats(db: AsyncSession, organization_id: uuid.UUID, period_d
     used_today = today_result.scalar_one()
     limit = DAILY_QUERY_LIMITS.get(org.plan, settings.FREE_PLAN_MAX_QUERIES_PER_DAY)
 
+    # Top users by event count
+    top_users_result = await db.execute(
+        select(
+            AnalyticsEvent.user_id,
+            func.count().label("event_count"),
+        )
+        .where(
+            and_(
+                AnalyticsEvent.organization_id == organization_id,
+                AnalyticsEvent.created_at >= since,
+                AnalyticsEvent.user_id.isnot(None),
+            )
+        )
+        .group_by(AnalyticsEvent.user_id)
+        .order_by(func.count().desc())
+        .limit(10)
+    )
+    top_users = [
+        {"user_id": str(row.user_id), "events": row.event_count}
+        for row in top_users_result
+    ]
+
     return UsageStatsOut(
         organization_id=organization_id,
         period_days=period_days,
@@ -125,7 +147,7 @@ async def get_usage_stats(db: AsyncSession, organization_id: uuid.UUID, period_d
         total_dashboard_views=total_views,
         active_users=active_users,
         queries_by_day=queries_by_day,
-        top_users=[],
+        top_users=top_users,
         plan=org.plan.value,
         queries_remaining_today=max(0, limit - used_today),
     )

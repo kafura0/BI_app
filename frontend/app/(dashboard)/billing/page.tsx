@@ -100,7 +100,7 @@ function BillingContent() {
 
 export default function BillingPage() {
   return (
-    <Suspense fallback={<div className="text-slate-400">Loading...</div>}>
+    <Suspense fallback={<div className="flex justify-center py-16"><Loader2 className="w-6 h-6 text-indigo-400 animate-spin" /></div>}>
       <BillingContent />
     </Suspense>
   );

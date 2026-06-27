@@ -62,6 +62,12 @@ async def send_invite_email(to: str, invited_by: str, org_name: str, role: str, 
     await send_email(to, f"You're invited to join {org_name} on BI Platform", html)
 
 
+async def send_password_reset_email(to: str, full_name: str, token: str) -> None:
+    reset_url = f"{settings.APP_URL}/reset-password?token={token}"
+    html = _render("reset_password", full_name=full_name, reset_url=reset_url, expire_hours=1)
+    await send_email(to, "Reset your BI Platform password", html)
+
+
 async def send_welcome_email(to: str, full_name: str, org_name: str) -> None:
     html = _render("welcome", full_name=full_name, org_name=org_name, app_url=settings.APP_URL)
     await send_email(to, f"Welcome to BI Platform, {full_name}!", html)

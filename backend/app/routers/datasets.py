@@ -2,7 +2,7 @@ import uuid
 from typing import Annotated
 from fastapi import APIRouter, Depends, File, Form, Request, UploadFile, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, or_
 
 from ..database import get_db
 from ..middleware.auth import get_current_tenant, require_analyst, TenantContext
@@ -39,8 +39,9 @@ async def list_datasets(
     db: Annotated[AsyncSession, Depends(get_db)],
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
+    q: str | None = Query(None),
 ) -> DatasetListOut:
-    return await dataset_service.list_datasets(db, tenant.organization_id, page, page_size)
+    return await dataset_service.list_datasets(db, tenant.organization_id, page, page_size, q)
 
 
 @router.get("/{dataset_id}", response_model=DatasetOut)

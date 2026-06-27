@@ -54,6 +54,13 @@ class DashboardOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class DashboardListOut(BaseModel):
+    items: list[DashboardOut]
+    total: int
+    page: int
+    page_size: int
+
+
 class DashboardDataOut(BaseModel):
     dashboard: DashboardOut
     widget_data: dict[str, Any]  # widget_id -> chart data

@@ -157,7 +157,9 @@ export default function TeamPage() {
             <div className="px-5 py-3 border-b border-slate-800">
               <p className="text-slate-400 text-sm font-medium">Members</p>
             </div>
-            {members.map((member, i) => {
+            {members.length === 0 ? (
+              <div className="px-5 py-8 text-center text-slate-500 text-sm">No team members found.</div>
+            ) : members.map((member, i) => {
               const roleConf = ROLE_CONFIG[member.role as keyof typeof ROLE_CONFIG] ?? ROLE_CONFIG.viewer;
               return (
                 <div key={member.user_id} className={`flex items-center gap-4 px-5 py-4 ${i < members.length - 1 ? "border-b border-slate-800" : ""}`}>

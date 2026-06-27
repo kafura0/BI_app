@@ -66,8 +66,8 @@ def seed():
 
         # User
         session.execute(text("""
-            INSERT INTO users (id, email, hashed_password, full_name, is_active, is_superadmin, created_at, updated_at)
-            VALUES (:id, :email, :hashed_password, :full_name, true, false, now(), now())
+            INSERT INTO users (id, email, hashed_password, full_name, is_active, is_superadmin, email_verified, created_at, updated_at)
+            VALUES (:id, :email, :hashed_password, :full_name, true, false, true, now(), now())
         """), {
             "id": DEMO_USER_ID,
             "email": "demo@example.com",

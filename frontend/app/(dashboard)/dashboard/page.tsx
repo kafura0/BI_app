@@ -18,6 +18,9 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [exportingPdf, setExportingPdf] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalDashboards, setTotalDashboards] = useState(0);
+  const pageSize = 20;
   const { error: toastError, success: toastSuccess } = useToast();
 
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
@@ -26,15 +29,18 @@ export default function DashboardPage() {
     let cancelled = false;
     (async () => {
       try {
-        const [dashRes, dsRes] = await Promise.all([dashboardsApi.list(), datasetsApi.list()]);
+        const [dashRes, dsRes] = await Promise.all([dashboardsApi.list(page, pageSize), datasetsApi.list()]);
         if (cancelled) return;
-        setDashboards(dashRes.data);
+        setDashboards(dashRes.data.items);
+        setTotalDashboards(dashRes.data.total);
         setDatasets(dsRes.data.items);
-        if (dashRes.data.length > 0) {
-          setActiveDashboard(dashRes.data[0].id);
-          const dataRes = await dashboardsApi.getData(dashRes.data[0].id);
-          if (cancelled) return;
-          setDashboardData(dataRes.data.widget_data);
+        if (dashRes.data.items.length > 0) {
+          if (!dashRes.data.items.some((d) => d.id === activeDashboard)) {
+            setActiveDashboard(dashRes.data.items[0].id);
+            const dataRes = await dashboardsApi.getData(dashRes.data.items[0].id);
+            if (cancelled) return;
+            setDashboardData(dataRes.data.widget_data);
+          }
         }
       } catch (e) {
         if (!cancelled) setError(getErrorMessage(e));
@@ -43,10 +49,11 @@ export default function DashboardPage() {
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [page]);
 
   const switchDashboard = async (id: string) => {
     setActiveDashboard(id);
+    setError(null);
     try {
       const res = await dashboardsApi.getData(id);
       setDashboardData(res.data.widget_data);
@@ -207,6 +214,31 @@ export default function DashboardPage() {
         <div className="text-center py-12">
           <p className="text-slate-400 mb-4">No dashboards yet. Create one from a dataset.</p>
           <Link href="/datasets" className="text-indigo-400 hover:text-indigo-300 text-sm font-medium">View Datasets →</Link>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalDashboards > pageSize && (
+        <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-800">
+          <p className="text-sm text-slate-500">
+            Page {page} of {Math.ceil(totalDashboards / pageSize)} ({totalDashboards} total)
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1}
+              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-300 text-sm font-medium rounded-lg transition-colors"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={page >= Math.ceil(totalDashboards / pageSize)}
+              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-300 text-sm font-medium rounded-lg transition-colors"
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
     </div>

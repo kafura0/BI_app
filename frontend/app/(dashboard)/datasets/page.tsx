@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Database, Trash2, BarChart2, RefreshCw, CheckCircle, Clock, XCircle, Download, FileText } from "lucide-react";
+import { Plus, Database, Trash2, BarChart2, RefreshCw, CheckCircle, Clock, XCircle, Download, FileText, Search, X } from "lucide-react";
 import { datasetsApi, dashboardsApi, getErrorMessage } from "@/lib/api";
 import type { Dataset } from "@/types";
 import { formatBytes, formatDate, formatNumber } from "@/lib/utils";
@@ -60,25 +60,35 @@ export default function DatasetsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+
+  const loadData = async (q: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await datasetsApi.list(1, 20, q || undefined);
+      setDatasets(res.data.items);
+    } catch (e) {
+      setError(getErrorMessage(e));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await datasetsApi.list();
-        if (cancelled) return;
-        setDatasets(res.data.items);
-      } catch (e) {
-        if (!cancelled) setError(getErrorMessage(e));
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
+    loadData("");
   }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadData(search);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this dataset and all associated dashboards?")) return;
+    setError(null);
     try {
       await datasetsApi.delete(id);
       setDatasets((prev) => prev.filter((d) => d.id !== id));
@@ -89,6 +99,7 @@ export default function DatasetsPage() {
 
   const handleGenerateDashboard = async (datasetId: string, name: string) => {
     setGenerating(datasetId);
+    setError(null);
     try {
       await dashboardsApi.create({ name: `${name} — Dashboard`, dataset_id: datasetId });
       window.location.href = "/dashboard";
@@ -113,6 +124,21 @@ export default function DatasetsPage() {
       {error && (
         <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">{error}</div>
       )}
+
+      <div className="relative mb-4">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search..."
+          className="w-full pl-10 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+        {search && (
+          <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
 
       {loading ? (
         <div className="flex justify-center py-16"><RefreshCw className="w-6 h-6 text-indigo-400 animate-spin" /></div>

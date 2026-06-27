@@ -10,6 +10,17 @@ import type {
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
+let isRefreshing = false;
+let failedQueue: Array<{ resolve: Function; reject: Function }> = [];
+
+const processQueue = (error: unknown, token: string | null = null) => {
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (error) reject(error);
+    else resolve(token);
+  });
+  failedQueue = [];
+};
+
 function createApiClient(): AxiosInstance {
   const client = axios.create({
     baseURL: BASE_URL,
@@ -20,11 +31,38 @@ function createApiClient(): AxiosInstance {
 
   client.interceptors.response.use(
     (res) => res,
-    (error: AxiosError) => {
-      if (error.response?.status === 401 && typeof window !== "undefined") {
-        localStorage.removeItem("auth_state");
-        window.location.href = "/login";
+    async (error: AxiosError) => {
+      const originalRequest = error.config as any;
+      if (!originalRequest) return Promise.reject(error);
+
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        if (isRefreshing) {
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          }).then(() => {
+            return client(originalRequest);
+          });
+        }
+
+        originalRequest._retry = true;
+        isRefreshing = true;
+
+        try {
+          await refreshClient.post("/auth/refresh");
+          processQueue(null);
+          return client(originalRequest);
+        } catch (refreshError) {
+          processQueue(refreshError);
+          if (typeof window !== "undefined") {
+            localStorage.removeItem("auth_state");
+            window.location.href = "/login";
+          }
+          return Promise.reject(refreshError);
+        } finally {
+          isRefreshing = false;
+        }
       }
+
       return Promise.reject(error);
     }
   );
@@ -33,6 +71,13 @@ function createApiClient(): AxiosInstance {
 }
 
 export const apiClient = createApiClient();
+
+const refreshClient = axios.create({
+  baseURL: BASE_URL,
+  headers: { "Content-Type": "application/json" },
+  timeout: 30_000,
+  withCredentials: true,
+});
 
 // --- Auth ---
 export const authApi = {
@@ -52,12 +97,20 @@ export const authApi = {
     apiClient.get(`/auth/verify-email?token=${token}`),
 
   resendVerification: () => apiClient.post("/auth/resend-verification"),
+
+  refresh: () => refreshClient.post("/auth/refresh"),
+
+  forgotPassword: (email: string) =>
+    apiClient.post("/auth/forgot-password", { email }),
+
+  resetPassword: (token: string, password: string) =>
+    apiClient.post("/auth/reset-password", { token, password }),
 };
 
 // --- Datasets ---
 export const datasetsApi = {
-  list: (page = 1, pageSize = 20) =>
-    apiClient.get<PaginatedResponse<Dataset>>(`/datasets?page=${page}&page_size=${pageSize}`),
+  list: (page = 1, pageSize = 20, q?: string) =>
+    apiClient.get<PaginatedResponse<Dataset>>(`/datasets?page=${page}&page_size=${pageSize}${q ? `&q=${encodeURIComponent(q)}` : ""}`),
 
   get: (id: string) => apiClient.get<Dataset>(`/datasets/${id}`),
 
@@ -74,7 +127,8 @@ export const datasetsApi = {
 
 // --- Dashboards ---
 export const dashboardsApi = {
-  list: () => apiClient.get<Dashboard[]>("/dashboards"),
+  list: (page = 1, pageSize = 20) =>
+    apiClient.get<PaginatedResponse<Dashboard>>(`/dashboards?page=${page}&page_size=${pageSize}`),
 
   create: (data: { name: string; dataset_id: string; description?: string }) =>
     apiClient.post<Dashboard>("/dashboards", data),
@@ -91,7 +145,8 @@ export const dashboardsApi = {
 
 // --- Insights ---
 export const insightsApi = {
-  list: (page = 1) => apiClient.get<{ items: Insight[]; total: number }>(`/insights?page=${page}`),
+  list: (page = 1, q?: string) =>
+    apiClient.get<{ items: Insight[]; total: number }>(`/insights?page=${page}${q ? `&q=${encodeURIComponent(q)}` : ""}`),
 
   create: (query: string, datasetId?: string) =>
     apiClient.post<Insight>("/insights", { query, dataset_id: datasetId }),

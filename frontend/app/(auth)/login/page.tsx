@@ -56,6 +56,11 @@ function LoginContent() {
             className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
           {errors.password && <p className="mt-1 text-xs text-red-400">{errors.password.message}</p>}
+          <div className="mt-1.5 text-right">
+            <Link href="/forgot-password" className="text-xs text-indigo-400 hover:text-indigo-300">
+              Forgot password?
+            </Link>
+          </div>
         </div>
 
         <button
