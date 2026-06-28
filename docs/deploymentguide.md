@@ -2,175 +2,209 @@
 
 ## Prerequisites
 
-- Docker & Docker Compose (v2.22+)
-- Domain name(s) pointed at your server
-- OpenAI API key (or alternative AI provider)
+- GitHub account
+- OpenAI API key (optional, for AI features)
 - (Optional) Stripe account for billing
 - (Optional) SMTP credentials for transactional emails
 
 ---
 
-## Quick Start (Docker Compose)
+## Free Tier Architecture
 
-```bash
-# 1. Clone and enter the docker directory
-cd docker
+| Component | Platform | Cost | Card? | Sleep? |
+|---|---|---|---|---|
+| **Frontend** (Next.js) | **Vercel** | Free | No | Never sleeps |
+| **Backend** (FastAPI) | **Render** | Free | No | Sleeps after 15min idle (~30s wake) |
+| **Database** (PostgreSQL) | **Supabase** | Free (500MB) | No | Never sleeps |
 
-# 2. Copy and edit environment variables
-cp .env.example .env
+```text
+                         ┌──────────────┐
+                         │    Vercel     │
+                         │  (Frontend)   │
+                         └──────┬───────┘
+                                │ HTTPS
+                         ┌──────┴───────┐
+                         │    Render     │
+                         │  (Backend)    │
+                         └──────┬───────┘
+                    ┌───────────┴───────────┐
+                    ▼                       ▼
+             ┌──────────┐          ┌──────────────┐
+             │ Supabase  │          │  OpenAI API   │
+             │ Postgres  │          │  (optional)   │
+             └──────────┘          └──────────────┘
 ```
-
-```bash
-# Quick secret generation
-./scripts/generate-secrets.sh
-```
-
-Edit `docker/.env` with your production values (see [full reference below](#environment-variables-reference)):
-
-```env
-POSTGRES_PASSWORD=<generated_24_char_password>
-SECRET_KEY=<generated_64_char_hex>
-OPENAI_API_KEY=sk-...
-DOMAIN=app.yourdomain.com
-API_DOMAIN=api.yourdomain.com
-CADDY_EMAIL=admin@yourdomain.com
-ALLOWED_ORIGINS=https://app.yourdomain.com
-NEXT_PUBLIC_API_URL=https://api.yourdomain.com/api/v1
-DEBUG=false
-```
-
-```bash
-# 3. Start all services (Caddy auto-proxies + gets SSL)
-docker compose --env-file docker/.env up --build -d
-
-# 4. Run database migrations
-docker compose exec backend alembic upgrade head
-
-# 5. (Optional) Seed demo data
-docker compose exec backend python /app/scripts/seed.py
-
-# 6. Verify via the proxy
-curl https://api.yourdomain.com/health
-```
-
-| Service    | Internal Port | External (via Caddy) |
-|------------|--------------|----------------------|
-| Caddy      | 80 / 443     | 80 / 443             |
-| Frontend   | 3000         | `https://app.yourdomain.com` |
-| Backend    | 8000         | `https://api.yourdomain.com` |
-| PostgreSQL | 5432         | `localhost:5434` (admin only) |
-| Redis      | 6379         | — (internal only)    |
 
 ---
 
-## Production Architecture
+## Step 1 — Supabase (PostgreSQL)
 
-```text
-                        ┌──────────────┐
-                        │   CDN / DNS   │
-                        │ (Cloudflare)  │
-                        └──────┬───────┘
-                    ┌──────────┴──────────┐
-                    │   Reverse Proxy     │
-                    │  (nginx / Caddy)    │
-                    │  SSL termination    │
-                    └────┬──────────┬─────┘
-                  ┌──────┘          └──────┐
-                  ▼                         ▼
-           ┌──────────┐            ┌──────────────┐
-           │ Frontend │            │   Backend     │
-           │ :3001    │◄──────────►│   :8001       │
-           └──────────┘            └──────┬───────┘
-                    ┌──────────┬──────────┘
-                    ▼          ▼
-             ┌─────────┐ ┌────────┐
-             │ Postgres│ │ Redis  │
-             │ :5434   │ │        │
-             └─────────┘ └────────┘
+### Sign up & create a project
+
+1. Go to **[supabase.com](https://supabase.com)** → click **"Start your project"**
+2. Sign up with GitHub (no credit card required)
+3. Click **"New project"**
+4. Fill in:
+   - **Name:** `bi-saas`
+   - **Database password:** generate a strong one and save it
+   - **Region:** pick the closest to you
+   - **Pricing plan:** Free
+5. Click **"Create new project"** (takes ~1-2 min)
+
+### Get the connection string
+
+1. In your project dashboard, go to **Project Settings** (gear icon) → **Database**
+2. Under **"Connection string"**, find the URI (make sure **connection pooling is OFF** — port should be **5432**)
+3. It looks like:
+   ```
+   postgresql://postgres:YOUR_PASSWORD@db.xxxxx.supabase.co:5432/postgres
+   ```
+4. Convert it to async format:
+   ```
+   postgresql+asyncpg://postgres:YOUR_PASSWORD@db.xxxxx.supabase.co:5432/postgres?sslmode=require
+   ```
+   (Replace `postgresql://` with `postgresql+asyncpg://` and append `?sslmode=require`)
+
+Save this string — you'll use it as `DATABASE_URL` in Step 2.
+
+---
+
+## Step 2 — Render (Backend)
+
+### Sign up
+
+1. Go to **[render.com](https://render.com)** → click **"Get Started"** → sign up with GitHub
+2. No credit card required — click the free tier options
+
+### Create Web Service
+
+1. In the dashboard, click **"New +"** → **"Web Service"**
+2. Select your `BI_app` GitHub repository
+3. Fill in:
+   - **Name:** `bi-saas-backend`
+   - **Region:** pick the closest to you
+   - **Branch:** `main`
+   - **Runtime:** **Docker** (Render will detect the `Dockerfile` at the repo root)
+   - **Plan:** **Free** ($0/month)
+4. Click **"Advanced"** to expand environment variables
+
+### Set environment variables
+
+Add each of these:
+
+| Variable | Value |
+|---|---|
+| `DATABASE_URL` | Your Supabase async connection string from Step 1 |
+| `SECRET_KEY` | Run `python -c "import secrets; print(secrets.token_hex(32))"` and paste the output |
+| `OPENAI_API_KEY` | Your OpenAI key (leave blank to skip AI features) |
+| `OPENAI_MODEL` | `gpt-4o-mini` |
+| `ALLOWED_ORIGINS` | Set after Vercel deploys (Step 3) — update this later |
+| `APP_URL` | Set after Vercel deploys (Step 3) — update this later |
+| `RATELIMIT_ENABLED` | `false` (no Redis on free tier) |
+| `DEBUG` | `false` |
+
+5. Click **"Create Web Service"** — Render will build and deploy (takes ~5 min)
+6. Once deployed, copy your Render URL — it looks like `https://bi-saas-backend.onrender.com`
+
+### Run database migrations
+
+After the service is live, go to the **"Shell"** tab in your Render dashboard and run:
+
+```bash
+alembic upgrade head
 ```
 
-For production, always place a reverse proxy in front of the backend and frontend. Example nginx config:
+(Or trigger a health check at `https://bi-saas-backend.onrender.com/health` — tables auto-create on first startup.)
 
-```nginx
-# API subdomain
-server {
-    listen 443 ssl;
-    server_name api.yourdomain.com;
-    location / {
-        proxy_pass http://127.0.0.1:8001;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
+### Important: Prevent free tier sleep
 
-# App subdomain
-server {
-    listen 443 ssl;
-    server_name app.yourdomain.com;
-    location / {
-        proxy_pass http://127.0.0.1:3001;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
-}
-```
+The free Render service sleeps after 15 minutes of inactivity. To keep it warm during work hours, you can use **[cron-job.org](https://cron-job.org)** (free) to ping your `/health` endpoint every 10 minutes.
+
+---
+
+## Step 3 — Vercel (Frontend)
+
+### Sign up & deploy
+
+1. Go to **[vercel.com](https://vercel.com)** → click **"Sign Up"** → **"Continue with GitHub"**
+2. Click **"Add New…"** → **"Project"**
+3. Import your `BI_app` repository
+4. Set:
+   - **Framework preset:** Next.js (auto-detected)
+   - **Root Directory:** `frontend/` (important — our Next.js app is in the subdirectory)
+   - **Build Command:** `npm run build`
+   - **Output Directory:** `.next`
+5. Click **"Environment Variables"** and add:
+
+| Variable | Value |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | `https://bi-saas-backend.onrender.com/api/v1` (your Render URL + `/api/v1`) |
+
+6. Click **"Deploy"**
+
+Once deployed, Vercel gives you a URL like `https://bi-saas-frontend.vercel.app`. Copy it.
+
+### Update CORS on Render
+
+Go back to your **Render dashboard** → your web service → **Environment** tab. Update these variables:
+
+| Variable | New Value |
+|---|---|
+| `ALLOWED_ORIGINS` | `https://bi-saas-frontend.vercel.app` |
+| `APP_URL` | `https://bi-saas-frontend.vercel.app` |
+
+Then click **"Save Changes"** — Render will auto-redeploy.
 
 ---
 
 ## Environment Variables Reference
 
-### Backend (`docker/.env`)
+### Backend (Render env vars)
 
 | Variable | Required | Notes |
 |---|---|---|
 | `SECRET_KEY` | Yes | Min 32 chars, use `secrets.token_hex(32)` |
-| `POSTGRES_PASSWORD` | Yes | Strong password for DB |
-| `DATABASE_URL` | Auto | Built from `POSTGRES_PASSWORD` in compose |
-| `OPENAI_API_KEY` | Yes* | *Required if AI features are enabled |
+| `DATABASE_URL` | Yes | Supabase async connection string with `?sslmode=require` |
+| `OPENAI_API_KEY` | No* | *Required if AI features are enabled |
 | `OPENAI_MODEL` | No | Default: `gpt-4o-mini` |
-| `REDIS_URL` | No | Default: `redis://redis:6379/0` |
-| `ALLOWED_ORIGINS` | Yes | Comma-separated, e.g. `https://app.yourdomain.com` |
+| `ALLOWED_ORIGINS` | Yes | Comma-separated Vercel frontend URLs |
 | `APP_URL` | Yes | Public frontend URL for links/emails |
+| `RATELIMIT_ENABLED` | No | Set to `false` if no Redis |
+| `DEBUG` | No | Must be `false` in production |
 | `SMTP_*` | No | Leave blank to log emails to console |
 | `STRIPE_*` | No | Leave blank to disable billing |
-| `DEBUG` | No | Must be `false` in production |
 
-### Frontend (Docker build arg)
+### Frontend (Vercel env vars)
 
-| Arg | Required | Notes |
+| Variable | Required | Notes |
 |---|---|---|
-| `NEXT_PUBLIC_API_URL` | Yes | Public API URL clients will call |
+| `NEXT_PUBLIC_API_URL` | Yes | Full URL to Render backend + `/api/v1` |
 
 ---
 
 ## Database Migrations
 
+If you need to run migrations manually (e.g., after schema changes):
+
 ```bash
-# Run pending migrations
-docker compose exec backend alembic upgrade head
-
-# Create a new migration (after model changes)
-docker compose exec backend alembic revision --autogenerate -m "description"
-
-# Rollback one step
-docker compose exec backend alembic downgrade -1
+# Via Render Shell tab
+alembic upgrade head
 ```
 
-Migrations run automatically on first startup via `Base.metadata.create_all` in the FastAPI lifespan, but use `alembic upgrade head` explicitly for production deployments.
+Tables auto-create on application startup via `Base.metadata.create_all`, but use `alembic upgrade head` explicitly for production schema changes.
 
 ---
 
 ## Seeding Demo Data
 
 ```bash
-docker compose exec backend python /app/scripts/seed.py
+# Via Render Shell tab
+python /app/scripts/seed.py
 ```
 
 This creates:
 - **Email:** `demo@example.com`
 - **Password:** `Demo1234`
-- Demo organization, dataset, dashboard, and sample insights
 
 ---
 
@@ -186,18 +220,7 @@ The project includes a GitHub Actions CI workflow (`.github/workflows/ci.yml`):
 | `frontend-test` | `jest --passWithNoTests` |
 | `docker-build` | `docker compose build` |
 
-To add CD, extend the workflow after tests pass:
-
-```yaml
-deploy:
-  needs: [backend-lint, backend-test, frontend-lint, frontend-test, docker-build]
-  runs-on: ubuntu-latest
-  steps:
-    - name: Deploy to production
-      run: |
-        # Use SSH deploy key, Docker context, or cloud CLI
-        # to pull and restart on your server
-```
+Both Render and Vercel auto-deploy when you push to `main` (if you enabled auto-deploy).
 
 ---
 
@@ -205,16 +228,13 @@ deploy:
 
 - [ ] **SECRET_KEY** — generated with `secrets.token_hex(32)`, never shared
 - [ ] **DEBUG=false** — disables detailed error pages
-- [ ] **PostgreSQL password** — strong, unique, rotated
-- [ ] **SSL/TLS** — terminate at reverse proxy (Let's Encrypt via Caddy/Certbot)
-- [ ] **ALLOWED_ORIGINS** — locked to your actual domain(s)
-- [ ] **Rate limiting** — enabled by default (Redis-backed via slowapi)
-- [ ] **Database backups** — configure `pg_dump` cron job
-- [ ] **Monitoring** — add uptime monitoring (health endpoint at `/health`)
-- [ ] **Logging** — Uvicorn logs to stdout; collect with Docker log driver or external service
-- [ ] **Non-root user** — frontend already runs as `nextjs` user
+- [ ] **ALLOWED_ORIGINS** — locked to your Vercel frontend domain
+- [ ] **DATABASE_URL** — uses `?sslmode=require` for Supabase
+- [ ] **RATELIMIT_ENABLED=false** — rate limiting requires Redis (paid add-on)
+- [ ] **Uptime monitoring** — use cron-job.org to ping `/health` every 10min (prevents Render sleep)
+- [ ] **Logging** — Render captures stdout logs; view in dashboard
 - [ ] **File uploads** — `MAX_UPLOAD_SIZE_MB` defaults to 50; adjust as needed
-- [ ] **Key rotation** — rotate `SECRET_KEY`, `OPENAI_API_KEY`, Stripe keys regularly
+- [ ] **Key rotation** — rotate `SECRET_KEY` and `OPENAI_API_KEY` regularly
 
 ---
 
@@ -223,30 +243,31 @@ deploy:
 - **JWT authentication** — access tokens expire in 60 min, refresh tokens in 7 days
 - **RBAC** — three roles: `admin`, `analyst`, `viewer`
 - **Multi-tenant** — all data scoped by organization via `TenantContext`
-- **Rate limiting** — Redis-backed, configurable via `RATELIMIT_ENABLED`
-- **CORS** — locked to `ALLOWED_ORIGINS`
+- **CORS** — locked to `ALLOWED_ORIGINS` (your Vercel domain only)
 - **File validation** — strict MIME type and extension checks on upload
 
 ---
 
-## Scaling
+## Docker Compose (Self-Hosted Alternative)
 
-### Horizontal
+If you prefer to run on your own VPS:
 
-- **Backend**: Increase `--workers` in the Dockerfile (or use `gunicorn` with uvicorn workers)
-- **Frontend**: Stateless; scale behind a load balancer
-- **Postgres**: Consider read replicas for analytics queries
-- **Redis**: Used only for rate limiting; minimal load
+```bash
+cd docker
+cp .env.example .env
+# Edit .env with your values
+docker compose --env-file .env up --build -d
+```
 
-### Docker Compose → Orchestration
+| Service    | Internal Port | External Port |
+|------------|--------------|---------------|
+| Caddy      | 80 / 443     | 80 / 443      |
+| Frontend   | 3000         | — (via Caddy) |
+| Backend    | 8000         | — (via Caddy) |
+| PostgreSQL | 5432         | 5434          |
+| Redis      | 6379         | —             |
 
-For multi-node production, migrate from Docker Compose to:
-
-- **AWS ECS / Fargate** — with Cloud Map for service discovery
-- **Kubernetes** — each service as a deployment with horizontal pod autoscaling
-- **Render / Railway** — simpler PaaS alternatives with Docker support
-
-The `NEXT_PUBLIC_API_URL` build arg requirement means frontend must be rebuilt per environment (staging vs production).
+Requires a VPS with Docker installed and a domain pointed at it.
 
 ---
 
@@ -254,8 +275,9 @@ The `NEXT_PUBLIC_API_URL` build arg requirement means frontend must be rebuilt p
 
 | Symptom | Likely Cause | Fix |
 |---|---|---|
-| Backend won't start | DB not ready / wrong DATABASE_URL | Check `postgres` health; verify `POSTGRES_PASSWORD` |
-| Frontend shows blank page | Wrong `NEXT_PUBLIC_API_URL` | Rebuild frontend with correct API URL |
-| AI features return errors | Missing `OPENAI_API_KEY` or quota exhausted | Verify key and billing status |
+| Backend won't start | Wrong `DATABASE_URL` or Supabase SSL | Ensure URL has `?sslmode=require` and `+asyncpg` driver |
+| Frontend shows blank page | Wrong `NEXT_PUBLIC_API_URL` | Redeploy frontend with correct Render URL |
+| AI features return errors | Missing `OPENAI_API_KEY` or quota exhausted | Verify key in Render env vars |
+| Backend slow on first request | Render free tier cold start (~30s) | Use cron-job.org to ping every 10min |
 | Email not sending | Missing SMTP env vars | Configure SMTP or check spam folder |
-| `pg_isready` fails | Postgres still initializing | Wait 10-15s for first-time volume init |
+| CORS error in browser | `ALLOWED_ORIGINS` doesn't match Vercel URL | Update and redeploy Render |
