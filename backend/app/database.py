@@ -32,7 +32,7 @@ clean_url = _build_engine_url(raw_url)
 
 engine = create_async_engine(
     clean_url,
-    connect_args=_connect_args or None,
+    connect_args=_connect_args,
     pool_pre_ping=True,
     pool_size=10,
     max_overflow=20,
