@@ -33,6 +33,8 @@ class InsightRequest(BaseModel):
 
 
 class InsightCreate(BaseModel):
+    model_config = {"protected_namespaces": ()}
+
     organization_id: uuid.UUID
     user_id: uuid.UUID
     dataset_id: uuid.UUID | None
@@ -45,6 +47,8 @@ class InsightCreate(BaseModel):
 
 
 class InsightOut(BaseModel):
+    model_config = {"from_attributes": True, "protected_namespaces": ()}
+
     id: uuid.UUID
     dataset_id: uuid.UUID | None
     user_id: uuid.UUID
@@ -53,8 +57,6 @@ class InsightOut(BaseModel):
     model_used: str
     tokens_used: int
     created_at: datetime
-
-    model_config = {"from_attributes": True}
 
 
 class InsightListOut(BaseModel):
