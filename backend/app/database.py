@@ -20,7 +20,7 @@ def _build_engine_url(raw_url: str) -> str:
         new_url = parsed._replace(query="").geturl()
     return new_url
 
-_connect_args: dict = {}
+_connect_args: dict = {"statement_cache_size": 0}
 raw_url = settings.DATABASE_URL
 parsed = urlparse(raw_url)
 ssl_mode_qs = parse_qs(parsed.query).get("sslmode")
