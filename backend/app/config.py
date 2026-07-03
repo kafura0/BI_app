@@ -13,6 +13,13 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     API_V1_PREFIX: str = "/api/v1"
 
+    @field_validator("DEBUG", mode="before")
+    @classmethod
+    def parse_debug(cls, v: object) -> bool:
+        if v == "" or v is None:
+            return False
+        return bool(v)
+
     # Security
     SECRET_KEY: str = ""
     ALGORITHM: str = "HS256"
