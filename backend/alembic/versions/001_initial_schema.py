@@ -17,10 +17,10 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     # --- ENUMS ---
-    op.execute("CREATE TYPE IF NOT EXISTS plantype AS ENUM ('free', 'pro', 'enterprise')")
-    op.execute("CREATE TYPE IF NOT EXISTS memberrole AS ENUM ('admin', 'analyst', 'viewer')")
-    op.execute("CREATE TYPE IF NOT EXISTS datasetstatus AS ENUM ('pending', 'processing', 'ready', 'failed')")
-    op.execute("CREATE TYPE IF NOT EXISTS invitestatus AS ENUM ('pending', 'accepted', 'expired', 'revoked')")
+    op.execute("CREATE TYPE plantype AS ENUM ('free', 'pro', 'enterprise')")
+    op.execute("CREATE TYPE memberrole AS ENUM ('admin', 'analyst', 'viewer')")
+    op.execute("CREATE TYPE datasetstatus AS ENUM ('pending', 'processing', 'ready', 'failed')")
+    op.execute("CREATE TYPE invitestatus AS ENUM ('pending', 'accepted', 'expired', 'revoked')")
 
     # --- USERS ---
     op.create_table(

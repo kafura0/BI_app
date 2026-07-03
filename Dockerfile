@@ -18,4 +18,4 @@ ENV PYTHONPATH="/app:/ai-engine"
 EXPOSE 8000
 
 COPY scripts/ /scripts/
-CMD python /scripts/db_check.py && alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+CMD python /scripts/db_check.py && uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
