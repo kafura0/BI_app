@@ -25,7 +25,6 @@ export default function DashboardEditPage() {
         const res = await dashboardsApi.getData(id);
         if (cancelled) return;
         const d = res.data.dashboard;
-        const wd = res.data.widget_data;
         setWidgets(d.widgets as WidgetConfig[]);
         setName(d.name);
 

@@ -49,6 +49,7 @@ export default function DashboardPage() {
       }
     })();
     return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   const switchDashboard = async (id: string) => {

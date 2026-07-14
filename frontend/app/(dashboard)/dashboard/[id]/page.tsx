@@ -71,7 +71,7 @@ export default function DashboardViewPage() {
         <BarChart3 className="w-8 h-8 text-red-400" />
       </div>
       <h2 className="text-xl font-semibold text-white mb-2">Dashboard not found</h2>
-      <p className="text-slate-400 mb-6 max-w-md">This dashboard may have been deleted or you don't have access to it.</p>
+      <p className="text-slate-400 mb-6 max-w-md">This dashboard may have been deleted or you do not have access to it.</p>
       <Link href="/dashboard" className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg transition-colors">
         Back to Dashboards
       </Link>
