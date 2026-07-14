@@ -17,6 +17,7 @@ export default function DashboardEditPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [widgetData, setWidgetData] = useState<Record<string, any>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -25,7 +26,7 @@ export default function DashboardEditPage() {
         const res = await dashboardsApi.getData(id);
         if (cancelled) return;
         const d = res.data.dashboard;
-        const widgetData = res.data.widget_data;
+        setWidgetData(res.data.widget_data);
         setWidgets(d.widgets as WidgetConfig[]);
         setName(d.name);
 
