@@ -250,7 +250,7 @@ export function WidgetGrid({ widgets, columns, onChange, readOnly = false, widge
                 ) : widget.type === "forecast" ? (
                   <ForecastChart
                     title={widget.title}
-                    data={(widgetData?.[widget.id] as { data: Array<{ x: string; value: number; type: string }>; r2: number; periods: number } | undefined) ?? { data: [], r2: 0, periods: 0 }}
+                    data={(widgetData?.[widget.id] as { data: Array<{ x: string; value: number; type: "actual" | "forecast" }>; r2: number; periods: number } | undefined) ?? { data: [], r2: 0, periods: 0 }}
                   />
                 ) : (
                   <div className="flex-1 flex items-center justify-center text-slate-600 text-xs p-4">
