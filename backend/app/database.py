@@ -1,3 +1,4 @@
+import uuid
 from urllib.parse import urlparse, urlencode, parse_qs
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase, MappedColumn, mapped_column
@@ -8,6 +9,15 @@ from typing import AsyncGenerator, Optional
 from .config import get_settings
 
 settings = get_settings()
+
+# Monkey-patch asyncpg to use random statement names (PgBouncer compatibility)
+import asyncpg.connection as _asyncpg_conn
+_orig_prepare = _asyncpg_conn.Connection.prepare
+async def _patched_prepare(self, query, *, timeout=None, name=None):
+    if name is None:
+        name = f"__asyncpg_stmt_{uuid.uuid4().hex}__"
+    return await _orig_prepare(self, query, timeout=timeout, name=name)
+_asyncpg_conn.Connection.prepare = _patched_prepare
 
 def _build_engine_url(raw_url: str) -> str:
     parsed = urlparse(raw_url)
