@@ -1,3 +1,4 @@
+import os
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
@@ -25,13 +26,14 @@ REFRESH_COOKIE_MAX_AGE = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600
 
 
 def set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:
+    secure = os.environ.get("RENDER") == "true" or not settings.DEBUG
     response.set_cookie(
         key=COOKIE_NAME,
         value=access_token,
         max_age=COOKIE_MAX_AGE,
         httponly=True,
         samesite="lax",
-        secure=False,
+        secure=secure,
         path=COOKIE_PATH,
     )
     response.set_cookie(
@@ -40,7 +42,7 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str) 
         max_age=REFRESH_COOKIE_MAX_AGE,
         httponly=True,
         samesite="lax",
-        secure=False,
+        secure=secure,
         path=COOKIE_PATH,
     )
 
