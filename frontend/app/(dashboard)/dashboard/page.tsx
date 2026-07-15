@@ -1,14 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, RefreshCw, BarChart3, Pencil, FileText, Trash2 } from "lucide-react";
+import { Plus, RefreshCw, Pencil, FileText, Trash2 } from "lucide-react";
 import { dashboardsApi, datasetsApi, getErrorMessage } from "@/lib/api";
 import type { Dashboard, Dataset } from "@/types";
-import { MetricsCard } from "@/components/charts/metrics-card";
 import { RevenueChart } from "@/components/charts/revenue-chart";
 import { ForecastChart } from "@/components/charts/forecast-chart";
 import { downloadWithAuth } from "@/lib/download";
 import { useToast } from "@/components/ui/toast";
+import { formatNumber } from "@/lib/utils";
 
 export default function DashboardPage() {
   const [dashboards, setDashboards] = useState<Dashboard[]>([]);
@@ -97,51 +97,45 @@ export default function DashboardPage() {
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
-      <RefreshCw className="w-6 h-6 text-indigo-400 animate-spin" />
+      <RefreshCw className="w-6 h-6 animate-spin" style={{ color: "var(--primary)" }} />
     </div>
   );
 
   if (datasets.length === 0) return (
     <div className="flex flex-col items-center justify-center h-96 text-center">
-      <div className="w-16 h-16 bg-indigo-600/10 rounded-2xl flex items-center justify-center mb-4">
-        <BarChart3 className="w-8 h-8 text-indigo-400" />
+      <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ backgroundColor: "var(--primary-container)" }}>
+        <span className="material-symbols-outlined text-[32px]" style={{ color: "var(--on-primary-container)" }}>bar_chart</span>
       </div>
-      <h2 className="text-xl font-semibold text-white mb-2">No data yet</h2>
-      <p className="text-slate-400 mb-6 max-w-md">Upload a CSV or Excel file to automatically generate your first dashboard.</p>
-      <Link href="/datasets" className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg transition-colors">
+      <h2 className="text-headline-md font-bold mb-2" style={{ color: "var(--on-surface)" }}>No data yet</h2>
+      <p className="text-body-md mb-6 max-w-md" style={{ color: "var(--on-surface-variant)" }}>Upload a CSV or Excel file to automatically generate your first dashboard.</p>
+      <Link href="/datasets" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all active:scale-95" style={{ backgroundColor: "var(--primary)", color: "var(--on-primary)" }}>
         <Plus className="w-4 h-4" /> Upload Dataset
       </Link>
     </div>
   );
 
   return (
-    <div>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-          <p className="text-slate-400 text-sm mt-0.5">AI-generated insights from your data</p>
-        </div>
-        <Link href="/datasets" className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors">
-          <Plus className="w-4 h-4" /> New Dataset
-        </Link>
-      </div>
+    <div className="space-y-lg">
+      {/* Header Section */}
+      <section className="space-y-sm">
+        <h2 className="font-display-lg text-display-lg tracking-tight" style={{ color: "var(--on-surface)" }}>Dashboard</h2>
+        <p className="font-body-lg text-body-lg" style={{ color: "var(--on-surface-variant)" }}>AI-generated insights from your data</p>
+      </section>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">{error}</div>
+        <div className="p-3 rounded-lg text-sm" style={{ backgroundColor: "var(--error-container)", color: "var(--on-error-container)" }}>{error}</div>
       )}
 
       {/* Dashboard tabs + actions */}
       {dashboards.length > 0 && (
-        <div className="flex items-center gap-2 mb-6 flex-wrap">
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
           <div className="flex gap-2 flex-1 flex-wrap">
             {dashboards.map((d) => (
               <button
                 key={d.id}
                 onClick={() => switchDashboard(d.id)}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                  activeDashboard === d.id ? "bg-indigo-600 text-white" : "bg-slate-800 text-slate-400 hover:bg-slate-700"
-                }`}
+                className="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+                style={activeDashboard === d.id ? { backgroundColor: "var(--secondary-container)", color: "var(--on-secondary-container)" } : { backgroundColor: "var(--surface-container-high)", color: "var(--on-surface-variant)" }}
               >
                 {d.name}
               </button>
@@ -151,20 +145,23 @@ export default function DashboardPage() {
             <div className="flex items-center gap-2">
               <Link
                 href={`/dashboard/edit/${currentDashboard.id}`}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-medium rounded-lg transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                style={{ backgroundColor: "var(--surface-container-high)", color: "var(--on-surface-variant)" }}
               >
                 <Pencil className="w-3 h-3" /> Edit
               </Link>
               <button
                 onClick={() => handleExportPdf(currentDashboard)}
                 disabled={exportingPdf}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-400 hover:text-white text-xs font-medium rounded-lg transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                style={{ backgroundColor: "var(--surface-container-high)", color: "var(--on-surface-variant)" }}
               >
                 {exportingPdf ? <RefreshCw className="w-3 h-3 animate-spin" /> : <FileText className="w-3 h-3" />} Export PDF
               </button>
               <button
                 onClick={() => handleDelete(currentDashboard.id)}
-                className="p-1.5 text-slate-600 hover:text-red-400 transition-colors rounded-lg hover:bg-red-400/10"
+                className="p-1.5 rounded-lg transition-colors"
+                style={{ color: "var(--on-surface-variant)" }}
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -176,30 +173,33 @@ export default function DashboardPage() {
       {currentDashboard && (
         <>
           {/* Metric cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
             {currentDashboard.widgets
               .filter((w) => w.type === "metric_card")
               .map((widget) => {
                 const data = dashboardData[widget.id] as { value: number } | undefined;
                 return (
-                  <MetricsCard key={widget.id} title={widget.title} value={data?.value ?? 0} color={widget.color} />
+                  <div key={widget.id} className="glass-card glass-card-hover rounded-xl p-md space-y-sm transition-all">
+                    <p className="font-label-md text-label-md uppercase" style={{ color: "var(--on-surface-variant)" }}>{widget.title}</p>
+                    <h3 className="font-headline-md text-headline-md font-bold" style={{ color: "var(--on-surface)" }}>${formatNumber(data?.value ?? 0)}</h3>
+                  </div>
                 );
               })}
-          </div>
+          </section>
 
           {/* Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+          <section className="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
             {currentDashboard.widgets
               .filter((w) => w.type === "line_chart" || w.type === "bar_chart")
               .map((widget) => {
                 const data = dashboardData[widget.id] as { x: string; value: number }[] | undefined;
                 return (
-                  <div key={widget.id} className={widget.position.w >= 8 ? "lg:col-span-2" : "lg:col-span-1"}>
+                  <div key={widget.id} className={widget.position.w >= 8 ? "lg:col-span-2 glass-card rounded-xl p-lg" : "glass-card rounded-xl p-lg lg:col-span-1"}>
                     <RevenueChart title={widget.title} data={data ?? []} type={widget.type === "bar_chart" ? "bar" : "line"} color={widget.color} />
                   </div>
                 );
               })}
-          </div>
+          </section>
 
           {/* Forecast */}
           {currentDashboard.widgets
@@ -213,29 +213,30 @@ export default function DashboardPage() {
 
       {dashboards.length === 0 && datasets.length > 0 && (
         <div className="text-center py-12">
-          <p className="text-slate-400 mb-4">No dashboards yet. Create one from a dataset.</p>
-          <Link href="/datasets" className="text-indigo-400 hover:text-indigo-300 text-sm font-medium">View Datasets →</Link>
+          <p className="mb-4" style={{ color: "var(--on-surface-variant)" }}>No dashboards yet. Create one from a dataset.</p>
+          <Link href="/datasets" className="text-sm font-medium" style={{ color: "var(--primary)" }}>View Datasets →</Link>
         </div>
       )}
 
-      {/* Pagination */}
       {totalDashboards > pageSize && (
-        <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-800">
-          <p className="text-sm text-slate-500">
+        <div className="flex items-center justify-between pt-4" style={{ borderTop: "1px solid var(--outline-variant)" }}>
+          <p className="text-sm" style={{ color: "var(--on-surface-variant)" }}>
             Page {page} of {Math.ceil(totalDashboards / pageSize)} ({totalDashboards} total)
           </p>
           <div className="flex gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-300 text-sm font-medium rounded-lg transition-colors"
+              className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-40"
+              style={{ backgroundColor: "var(--surface-container-high)", color: "var(--on-surface)" }}
             >
               Previous
             </button>
             <button
               onClick={() => setPage((p) => p + 1)}
               disabled={page >= Math.ceil(totalDashboards / pageSize)}
-              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-300 text-sm font-medium rounded-lg transition-colors"
+              className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-40"
+              style={{ backgroundColor: "var(--surface-container-high)", color: "var(--on-surface)" }}
             >
               Next
             </button>

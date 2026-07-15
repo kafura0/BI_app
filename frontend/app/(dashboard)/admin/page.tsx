@@ -6,23 +6,14 @@ import type { UsageStats } from "@/types";
 import { RevenueChart } from "@/components/charts/revenue-chart";
 import { formatNumber } from "@/lib/utils";
 
-interface StatCardProps {
-  label: string;
-  value: number | string;
-  icon: React.ElementType;
-  color: string;
-}
-
-function StatCard({ label, value, icon: Icon, color }: StatCardProps) {
+function StatCard({ label, value, icon: Icon, color }: { label: string; value: number | string; icon: React.ElementType; color: string }) {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-      <div className="flex items-start justify-between mb-3">
-        <p className="text-slate-400 text-sm">{label}</p>
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${color}20` }}>
-          <Icon className="w-4 h-4" style={{ color }} />
-        </div>
+    <div className="glass-card rounded-xl p-lg">
+      <p className="font-label-md text-label-md uppercase mb-3" style={{ color: "var(--on-surface-variant)" }}>{label}</p>
+      <div className="flex items-center gap-2">
+        <Icon className="w-4 h-4" style={{ color }} />
+        <p className="text-headline-md font-bold" style={{ color: "var(--on-surface)" }}>{typeof value === "number" ? formatNumber(value) : value}</p>
       </div>
-      <p className="text-2xl font-bold text-white">{typeof value === "number" ? formatNumber(value) : value}</p>
     </div>
   );
 }
@@ -49,30 +40,22 @@ export default function AdminPage() {
     return () => { cancelled = true; };
   }, [period]);
 
-  const planBadge: Record<string, string> = {
-    free: "bg-slate-700 text-slate-300",
-    pro: "bg-indigo-600/20 text-indigo-400 border border-indigo-600/30",
-    enterprise: "bg-amber-600/20 text-amber-400 border border-amber-600/30",
-  };
-
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
+    <div className="space-y-lg">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Analytics</h1>
-          <p className="text-slate-400 text-sm mt-0.5">Platform usage for your organization</p>
+          <h2 className="font-headline-lg text-headline-lg" style={{ color: "var(--on-surface)" }}>Performance Analytics</h2>
+          <p className="font-body-lg text-body-lg" style={{ color: "var(--on-surface-variant)" }}>Platform usage for your organization</p>
         </div>
         <div className="flex items-center gap-2">
           {stats && (
-            <span className={`text-xs px-2.5 py-1 rounded-full font-medium capitalize ${planBadge[stats.plan] ?? planBadge.free}`}>
+            <span className="text-xs px-2.5 py-1 rounded-full font-medium capitalize" style={{ backgroundColor: "var(--surface-container-high)", color: "var(--on-surface-variant)" }}>
               {stats.plan} plan
             </span>
           )}
-          <select
-            value={period}
-            onChange={(e) => setPeriod(Number(e.target.value))}
-            className="bg-slate-800 border border-slate-700 text-white text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
+          <select value={period} onChange={(e) => setPeriod(Number(e.target.value))}
+            className="px-3 py-1.5 rounded-lg text-sm"
+            style={{ backgroundColor: "var(--surface-container-high)", border: "1px solid var(--outline-variant)", color: "var(--on-surface)" }}>
             <option value={7}>Last 7 days</option>
             <option value={30}>Last 30 days</option>
             <option value={90}>Last 90 days</option>
@@ -81,56 +64,55 @@ export default function AdminPage() {
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
+        <div className="p-3 rounded-lg text-sm" style={{ backgroundColor: "var(--error-container)", color: "var(--on-error-container)" }}>
           {error}
-          {error.includes("Admin") && <span className="block mt-1 text-xs text-slate-500">Admin role required to view analytics.</span>}
+          {error.includes("Admin") && <span className="block mt-1 text-xs opacity-80">Admin role required to view analytics.</span>}
         </div>
       )}
 
       {loading ? (
-        <div className="flex justify-center py-16"><RefreshCw className="w-6 h-6 text-indigo-400 animate-spin" /></div>
+        <div className="flex justify-center py-16"><RefreshCw className="w-6 h-6 animate-spin" style={{ color: "var(--primary)" }} /></div>
       ) : stats ? (
         <>
-          {/* AI queries remaining */}
-          <div className="mb-5 p-4 bg-indigo-600/5 border border-indigo-600/20 rounded-xl flex items-center justify-between">
+          <div className="p-md rounded-xl flex items-center justify-between" style={{ backgroundColor: "var(--primary-container)" }}>
             <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-indigo-400" />
-              <span className="text-slate-300 text-sm font-medium">AI Queries Remaining Today</span>
+              <Zap className="w-4 h-4" style={{ color: "var(--on-primary-container)" }} />
+              <span className="text-sm font-medium" style={{ color: "var(--on-primary-container)" }}>AI Queries Remaining Today</span>
             </div>
-            <span className="text-indigo-400 font-bold text-lg">{formatNumber(stats.queries_remaining_today)}</span>
+            <span className="font-bold text-lg" style={{ color: "var(--on-primary-container)" }}>{formatNumber(stats.queries_remaining_today)}</span>
           </div>
 
-          {/* Stat cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <StatCard label="AI Queries" value={stats.total_queries} icon={MessageSquare} color="#6366f1" />
-            <StatCard label="Datasets" value={stats.total_datasets} icon={Database} color="#8b5cf6" />
-            <StatCard label="Dashboard Views" value={stats.total_dashboard_views} icon={Eye} color="#10b981" />
-            <StatCard label="Active Users" value={stats.active_users} icon={Users} color="#f59e0b" />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-gutter">
+            <StatCard label="AI Queries" value={stats.total_queries} icon={MessageSquare} color="var(--primary)" />
+            <StatCard label="Datasets" value={stats.total_datasets} icon={Database} color="var(--secondary)" />
+            <StatCard label="Dashboard Views" value={stats.total_dashboard_views} icon={Eye} color="var(--tertiary)" />
+            <StatCard label="Active Users" value={stats.active_users} icon={Users} color="var(--on-surface)" />
           </div>
 
-          {/* Queries over time */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <RevenueChart
-              title="AI Queries Over Time"
-              data={stats.queries_by_day.map((d) => ({ x: d.date, value: d.value }))}
-              type="bar"
-              color="#6366f1"
-            />
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-              <h3 className="text-white font-semibold mb-4">Plan Usage</h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+            <div className="glass-card rounded-xl p-lg">
+              <RevenueChart
+                title="AI Queries Over Time"
+                data={stats.queries_by_day.map((d) => ({ x: d.date, value: d.value }))}
+                type="bar"
+                color="var(--primary)"
+              />
+            </div>
+            <div className="glass-card rounded-xl p-lg">
+              <h3 className="font-title-md mb-4" style={{ color: "var(--on-surface)" }}>Plan Usage</h3>
               <div className="space-y-3">
                 {[
-                  { label: "AI Queries (30d)", used: stats.total_queries, limit: stats.plan === "free" ? 600 : 15000, color: "#6366f1" },
-                  { label: "Datasets", used: stats.total_datasets, limit: stats.plan === "free" ? 5 : 50, color: "#8b5cf6" },
+                  { label: "AI Queries (30d)", used: stats.total_queries, limit: stats.plan === "free" ? 600 : 15000, color: "var(--primary)" },
+                  { label: "Datasets", used: stats.total_datasets, limit: stats.plan === "free" ? 5 : 50, color: "var(--secondary)" },
                 ].map(({ label, used, limit, color }) => {
                   const pct = Math.min(100, (used / limit) * 100);
                   return (
                     <div key={label}>
                       <div className="flex items-center justify-between text-sm mb-1">
-                        <span className="text-slate-400">{label}</span>
-                        <span className="text-slate-300">{formatNumber(used)} / {formatNumber(limit)}</span>
+                        <span style={{ color: "var(--on-surface-variant)" }}>{label}</span>
+                        <span style={{ color: "var(--on-surface)" }}>{formatNumber(used)} / {formatNumber(limit)}</span>
                       </div>
-                      <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                      <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: "var(--surface-container-high)" }}>
                         <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: color }} />
                       </div>
                     </div>

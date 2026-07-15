@@ -114,7 +114,7 @@ After the service is live, go to the **"Shell"** tab in your Render dashboard an
 alembic upgrade head
 ```
 
-(Or trigger a health check at `https://bi-saas-backend.onrender.com/health` — tables auto-create on first startup.)
+(Or trigger a health check at `https://bi-saas-backend.onrender.cohealth` — tables auto-create on first startup.)
 
 ### Important: Prevent free tier sleep
 
@@ -205,6 +205,7 @@ python /app/scripts/seed.py
 This creates:
 - **Email:** `demo@example.com`
 - **Password:** `Demo1234`
+
 
 ---
 

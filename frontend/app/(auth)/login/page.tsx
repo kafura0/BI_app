@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { BarChart3, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 const loginSchema = z.object({
@@ -26,38 +26,40 @@ function LoginContent() {
   const onSubmit = (data: LoginForm) => login(data.email, data.password, redirectTo);
 
   return (
-    <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8">
+    <div className="glass-card rounded-xl p-xl">
       {error && (
-        <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-300 text-sm">
+        <div className="mb-4 p-3 rounded-lg text-sm" style={{ backgroundColor: "var(--error-container)", color: "var(--on-error-container)" }}>
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-md">
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1.5">Email</label>
+          <label className="block text-label-md mb-1.5" style={{ color: "var(--on-surface-variant)" }}>Email</label>
           <input
             {...register("email")}
             type="email"
             autoComplete="email"
             placeholder="you@company.com"
-            className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-4 py-2.5 rounded-lg"
+            style={{ backgroundColor: "var(--surface-container-high)", border: "1px solid var(--outline-variant)", color: "var(--on-surface)" }}
           />
-          {errors.email && <p className="mt-1 text-xs text-red-400">{errors.email.message}</p>}
+          {errors.email && <p className="mt-1 text-xs" style={{ color: "var(--error)" }}>{errors.email.message}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
+          <label className="block text-label-md mb-1.5" style={{ color: "var(--on-surface-variant)" }}>Password</label>
           <input
             {...register("password")}
             type="password"
             autoComplete="current-password"
             placeholder="••••••••"
-            className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-4 py-2.5 rounded-lg"
+            style={{ backgroundColor: "var(--surface-container-high)", border: "1px solid var(--outline-variant)", color: "var(--on-surface)" }}
           />
-          {errors.password && <p className="mt-1 text-xs text-red-400">{errors.password.message}</p>}
+          {errors.password && <p className="mt-1 text-xs" style={{ color: "var(--error)" }}>{errors.password.message}</p>}
           <div className="mt-1.5 text-right">
-            <Link href="/forgot-password" className="text-xs text-indigo-400 hover:text-indigo-300">
+            <Link href="/forgot-password" className="text-xs font-medium" style={{ color: "var(--primary)" }}>
               Forgot password?
             </Link>
           </div>
@@ -66,15 +68,16 @@ function LoginContent() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+          className="w-full py-2.5 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95"
+          style={{ backgroundColor: "var(--primary)", color: "var(--on-primary)" }}
         >
           {isLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing in...</> : "Sign In"}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-slate-400">
+      <p className="mt-lg text-center text-sm" style={{ color: "var(--on-surface-variant)" }}>
         Don&apos;t have an account?{" "}
-        <Link href="/signup" className="text-indigo-400 hover:text-indigo-300 font-medium">
+        <Link href="/signup" className="font-medium" style={{ color: "var(--primary)" }}>
           Create workspace
         </Link>
       </p>
@@ -84,19 +87,23 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: "var(--surface-dim)" }}>
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
+        <div className="text-center mb-lg">
           <div className="inline-flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
-              <BarChart3 className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--primary-container)", color: "var(--on-primary-container)" }}>
+              <span className="material-symbols-outlined">bar_chart</span>
             </div>
-            <span className="text-white text-xl font-bold">BI Platform</span>
+            <span className="text-headline-md font-bold" style={{ color: "var(--on-surface)" }}>BI Platform</span>
           </div>
-          <h1 className="text-2xl font-bold text-white">Welcome back</h1>
-          <p className="text-slate-400 mt-1">Sign in to your workspace</p>
+          <h1 className="text-headline-lg font-bold" style={{ color: "var(--on-surface)" }}>Welcome back</h1>
+          <p className="text-body-md mt-1" style={{ color: "var(--on-surface-variant)" }}>Sign in to your workspace</p>
         </div>
-        <Suspense fallback={<div className="h-64 bg-white/10 rounded-2xl animate-pulse" />}>
+        <Suspense fallback={
+          <div className="glass-card rounded-xl p-xl flex items-center justify-center" style={{ height: "200px" }}>
+            <Loader2 className="w-6 h-6 animate-spin" style={{ color: "var(--primary)" }} />
+          </div>
+        }>
           <LoginContent />
         </Suspense>
       </div>

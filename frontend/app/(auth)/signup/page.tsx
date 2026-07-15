@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { BarChart3, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { slugify } from "@/lib/utils";
 
@@ -24,9 +24,7 @@ export default function SignupPage() {
   });
 
   const orgName = watch("org_name");
-  useEffect(() => {
-    if (orgName) setValue("org_slug", slugify(orgName));
-  }, [orgName, setValue]);
+  useEffect(() => { if (orgName) setValue("org_slug", slugify(orgName)); }, [orgName, setValue]);
 
   const onSubmit = (data: SignupForm) =>
     registerUser({
@@ -37,72 +35,80 @@ export default function SignupPage() {
     });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: "var(--surface-dim)" }}>
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
+        <div className="text-center mb-lg">
           <div className="inline-flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
-              <BarChart3 className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--primary-container)", color: "var(--on-primary-container)" }}>
+              <span className="material-symbols-outlined">bar_chart</span>
             </div>
-            <span className="text-white text-xl font-bold">BI Platform</span>
+            <span className="text-headline-md font-bold" style={{ color: "var(--on-surface)" }}>BI Platform</span>
           </div>
-          <h1 className="text-2xl font-bold text-white">Create your workspace</h1>
-          <p className="text-slate-400 mt-1">Start your free plan — no credit card required</p>
+          <h1 className="text-headline-lg font-bold" style={{ color: "var(--on-surface)" }}>Create your workspace</h1>
+          <p className="text-body-md mt-1" style={{ color: "var(--on-surface-variant)" }}>Start your free plan &mdash; no credit card required</p>
         </div>
 
-        <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8">
+        <div className="glass-card rounded-xl p-xl">
           {error && (
-            <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-300 text-sm">
+            <div className="mb-4 p-3 rounded-lg text-sm" style={{ backgroundColor: "var(--error-container)", color: "var(--on-error-container)" }}>
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-md">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Full Name</label>
-              <input {...register("full_name")} placeholder="Jane Smith" className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-              {errors.full_name && <p className="mt-1 text-xs text-red-400">{errors.full_name.message}</p>}
+              <label className="block text-label-md mb-1.5" style={{ color: "var(--on-surface-variant)" }}>Full Name</label>
+              <input {...register("full_name")} placeholder="Jane Smith"
+                className="w-full px-4 py-2.5 rounded-lg"
+                style={{ backgroundColor: "var(--surface-container-high)", border: "1px solid var(--outline-variant)", color: "var(--on-surface)" }} />
+              {errors.full_name && <p className="mt-1 text-xs" style={{ color: "var(--error)" }}>{errors.full_name.message}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Work Email</label>
-              <input {...register("email")} type="email" placeholder="jane@company.com" className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-              {errors.email && <p className="mt-1 text-xs text-red-400">{errors.email.message}</p>}
+              <label className="block text-label-md mb-1.5" style={{ color: "var(--on-surface-variant)" }}>Work Email</label>
+              <input {...register("email")} type="email" placeholder="jane@company.com"
+                className="w-full px-4 py-2.5 rounded-lg"
+                style={{ backgroundColor: "var(--surface-container-high)", border: "1px solid var(--outline-variant)", color: "var(--on-surface)" }} />
+              {errors.email && <p className="mt-1 text-xs" style={{ color: "var(--error)" }}>{errors.email.message}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
-              <input {...register("password")} type="password" placeholder="Min 8 chars, 1 digit" className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-              {errors.password && <p className="mt-1 text-xs text-red-400">{errors.password.message}</p>}
+              <label className="block text-label-md mb-1.5" style={{ color: "var(--on-surface-variant)" }}>Password</label>
+              <input {...register("password")} type="password" placeholder="Min 8 chars, 1 digit"
+                className="w-full px-4 py-2.5 rounded-lg"
+                style={{ backgroundColor: "var(--surface-container-high)", border: "1px solid var(--outline-variant)", color: "var(--on-surface)" }} />
+              {errors.password && <p className="mt-1 text-xs" style={{ color: "var(--error)" }}>{errors.password.message}</p>}
             </div>
 
-            <div className="border-t border-white/10 pt-4">
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Organization Name</label>
-              <input {...register("org_name")} placeholder="Acme Corp" className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-              {errors.org_name && <p className="mt-1 text-xs text-red-400">{errors.org_name.message}</p>}
+            <div className="pt-2" style={{ borderTop: "1px solid var(--outline-variant)" }}>
+              <label className="block text-label-md mb-1.5" style={{ color: "var(--on-surface-variant)" }}>Organization Name</label>
+              <input {...register("org_name")} placeholder="Acme Corp"
+                className="w-full px-4 py-2.5 rounded-lg"
+                style={{ backgroundColor: "var(--surface-container-high)", border: "1px solid var(--outline-variant)", color: "var(--on-surface)" }} />
+              {errors.org_name && <p className="mt-1 text-xs" style={{ color: "var(--error)" }}>{errors.org_name.message}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Workspace URL</label>
+              <label className="block text-label-md mb-1.5" style={{ color: "var(--on-surface-variant)" }}>Workspace URL</label>
               <div className="flex items-center">
-                <span className="text-slate-500 text-sm px-3 py-2.5 bg-white/5 border border-white/20 border-r-0 rounded-l-lg">app/</span>
-                <input {...register("org_slug")} placeholder="acme-corp" className="flex-1 px-4 py-2.5 bg-white/10 border border-white/20 rounded-r-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <span className="text-sm px-3 py-2.5 rounded-l-lg" style={{ backgroundColor: "var(--surface-variant)", border: "1px solid var(--outline-variant)", borderRight: "none", color: "var(--on-surface-variant)" }}>app/</span>
+                <input {...register("org_slug")} placeholder="acme-corp"
+                  className="flex-1 px-4 py-2.5 rounded-r-lg"
+                  style={{ backgroundColor: "var(--surface-container-high)", border: "1px solid var(--outline-variant)", color: "var(--on-surface)" }} />
               </div>
-              {errors.org_slug && <p className="mt-1 text-xs text-red-400">{errors.org_slug.message}</p>}
+              {errors.org_slug && <p className="mt-1 text-xs" style={{ color: "var(--error)" }}>{errors.org_slug.message}</p>}
             </div>
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 mt-2"
-            >
+            <button type="submit" disabled={isLoading}
+              className="w-full py-2.5 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-all active:scale-95 mt-2"
+              style={{ backgroundColor: "var(--primary)", color: "var(--on-primary)" }}>
               {isLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Creating workspace...</> : "Create Workspace"}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-slate-400">
+          <p className="mt-lg text-center text-sm" style={{ color: "var(--on-surface-variant)" }}>
             Already have an account?{" "}
-            <Link href="/login" className="text-indigo-400 hover:text-indigo-300 font-medium">Sign in</Link>
+            <Link href="/login" className="font-medium" style={{ color: "var(--primary)" }}>Sign in</Link>
           </p>
         </div>
       </div>

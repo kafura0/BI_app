@@ -1,117 +1,112 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  BarChart3, Database, MessageSquare, LayoutDashboard,
-  ShieldCheck, LogOut, ChevronsUpDown, Zap, Users, CreditCard,
-} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
+import { useTheme } from "@/hooks/use-theme";
 
 const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", adminOnly: false },
-  { href: "/datasets", icon: Database, label: "Datasets", adminOnly: false },
-  { href: "/insights", icon: MessageSquare, label: "AI Insights", adminOnly: false },
-  { href: "/team", icon: Users, label: "Team", adminOnly: false },
-  { href: "/admin", icon: ShieldCheck, label: "Analytics", adminOnly: true },
-  { href: "/billing", icon: CreditCard, label: "Billing", adminOnly: false },
+  { href: "/dashboard", icon: "dashboard", label: "Dashboard", adminOnly: false },
+  { href: "/datasets", icon: "database", label: "Data Sources", adminOnly: false },
+  { href: "/insights", icon: "smart_toy", label: "AI Insights", adminOnly: false },
+  { href: "/team", icon: "group", label: "Team", adminOnly: false },
+  { href: "/admin", icon: "monitoring", label: "Analytics", adminOnly: true },
+  { href: "/billing", icon: "credit_card", label: "Billing", adminOnly: false },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const { user, organization, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   return (
-    <aside className="w-64 min-h-screen bg-slate-900 border-r border-slate-800 flex flex-col">
+    <aside className="h-screen w-64 fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant flex flex-col z-50">
       {/* Logo */}
-      <div className="h-16 flex items-center px-6 border-b border-slate-800">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-            <BarChart3 className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-white font-bold text-lg">BI Platform</span>
-        </div>
+      <div className="px-6 py-md mb-6 mt-4">
+        <h1 className="text-headline-md font-bold" style={{ color: "var(--primary)" }}>BI Platform</h1>
+        <p className="text-label-md uppercase tracking-widest mt-1" style={{ color: "var(--on-surface-variant)" }}>Enterprise Analytics</p>
       </div>
 
       {/* Org pill */}
-      <div className="px-4 py-3 border-b border-slate-800">
-        <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition-colors group">
-          <div className="w-8 h-8 bg-indigo-600/20 border border-indigo-600/30 rounded-lg flex items-center justify-center">
-            <span className="text-indigo-400 text-sm font-bold uppercase">
-              {organization?.name?.[0] ?? "O"}
-            </span>
+      <div className="px-4 mb-4">
+        <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-variant transition-colors group">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: "var(--secondary-container)", color: "var(--on-secondary-container)" }}>
+            <span className="text-sm font-bold uppercase">{organization?.name?.[0] ?? "O"}</span>
           </div>
           <div className="flex-1 text-left min-w-0">
-            <p className="text-white text-sm font-medium truncate">{organization?.name ?? "Organization"}</p>
-            <p className="text-slate-500 text-xs capitalize">{organization?.plan ?? "free"} plan</p>
+            <p className="text-sm font-medium truncate" style={{ color: "var(--on-surface)" }}>{organization?.name ?? "Organization"}</p>
+            <p className="text-xs capitalize" style={{ color: "var(--on-surface-variant)" }}>{organization?.plan ?? "free"} plan</p>
           </div>
-          <ChevronsUpDown className="w-4 h-4 text-slate-500 group-hover:text-slate-400" />
+          <span className="material-symbols-outlined text-[20px]" style={{ color: "var(--on-surface-variant)" }}>expand_more</span>
         </button>
       </div>
 
       {/* Email verification banner */}
       {user && !user.email_verified && (
-        <div className="mx-3 mt-3 px-3 py-2 bg-amber-600/10 border border-amber-600/20 rounded-lg">
-          <p className="text-amber-400 text-xs font-medium">Verify your email</p>
-          <p className="text-slate-500 text-xs mt-0.5">Check your inbox to confirm your account.</p>
+        <div className="mx-3 mb-3 px-3 py-2 rounded-lg" style={{ backgroundColor: "var(--error-container)", color: "var(--on-error-container)" }}>
+          <p className="text-xs font-medium">Verify your email</p>
+          <p className="text-xs mt-0.5 opacity-80">Check your inbox to confirm your account.</p>
         </div>
       )}
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-4 space-y-1">
-        {navItems.filter(({ adminOnly }) => !adminOnly || user?.role === "admin").map(({ href, icon: Icon, label }) => {
+      <nav className="flex-1 space-y-1 px-3">
+        {navItems.filter(({ adminOnly }) => !adminOnly || user?.role === "admin").map(({ href, icon, label }) => {
           const active = pathname === href || pathname.startsWith(href + "/");
           return (
             <Link
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                "flex items-center gap-3 px-4 py-3 rounded-lg mx-1 transition-all duration-200",
                 active
-                  ? "bg-indigo-600/15 text-indigo-400 border border-indigo-600/20"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800"
+                  ? "sidebar-item-active"
+                  : "hover:bg-surface-variant transition-colors duration-200"
               )}
+              style={active ? { backgroundColor: "var(--secondary-container)", color: "var(--on-secondary-container)" } : { color: "var(--on-surface-variant)" }}
             >
-              <Icon className="w-4 h-4 shrink-0" />
-              {label}
+              <span className="material-symbols-outlined text-[20px]">{icon}</span>
+              <span className="text-body-md">{label}</span>
             </Link>
           );
         })}
       </nav>
 
-      {/* Upgrade CTA */}
-      {organization?.plan === "free" && (
-        <div className="px-4 pb-3">
-          <div className="bg-indigo-600/10 border border-indigo-600/20 rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <Zap className="w-4 h-4 text-indigo-400" />
-              <span className="text-indigo-400 text-xs font-semibold">Upgrade to Pro</span>
-            </div>
-            <p className="text-slate-500 text-xs">50 datasets · 500 AI queries/day</p>
-            <Link
-              href="/billing"
-              className="mt-2 block text-center text-xs bg-indigo-600 hover:bg-indigo-500 text-white py-1.5 rounded-md transition-colors font-medium"
-            >
-              View Plans
-            </Link>
-          </div>
-        </div>
-      )}
+      {/* Bottom actions */}
+      <div className="px-4 mt-6 space-y-2">
+        <Link
+          href="/insights"
+          className="w-full py-2.5 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95"
+          style={{ backgroundColor: "var(--primary)", color: "var(--on-primary)" }}
+        >
+          <span className="material-symbols-outlined text-[20px]">add</span>
+          New Analysis
+        </Link>
+
+        <button
+          onClick={toggleTheme}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors"
+          style={{ color: "var(--on-surface-variant)" }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--surface-variant)"}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+        >
+          <span className="material-symbols-outlined text-[20px]">{theme === "dark" ? "light_mode" : "dark_mode"}</span>
+          <span className="text-body-md">{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+        </button>
+      </div>
 
       {/* User */}
-      <div className="px-4 pb-4 border-t border-slate-800 pt-3">
+      <div className="px-4 pb-4 pt-3" style={{ borderTop: "1px solid var(--outline-variant)" }}>
         <div className="flex items-center gap-3 px-3 py-2">
-          <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center">
-            <span className="text-slate-300 text-sm font-medium uppercase">
-              {user?.full_name?.[0] ?? "U"}
-            </span>
+          <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: "var(--surface-variant)", color: "var(--on-surface-variant)" }}>
+            <span className="text-sm font-medium uppercase">{user?.full_name?.[0] ?? "U"}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white text-sm font-medium truncate">{user?.full_name}</p>
-            <p className="text-slate-500 text-xs truncate">{user?.email}</p>
+            <p className="text-sm font-medium truncate" style={{ color: "var(--on-surface)" }}>{user?.full_name}</p>
+            <p className="text-xs truncate" style={{ color: "var(--on-surface-variant)" }}>{user?.email}</p>
           </div>
-          <button onClick={logout} className="text-slate-500 hover:text-red-400 transition-colors" title="Sign out">
-            <LogOut className="w-4 h-4" />
+          <button onClick={logout} className="transition-colors" style={{ color: "var(--on-surface-variant)" }} title="Sign out">
+            <span className="material-symbols-outlined text-[20px]">logout</span>
           </button>
         </div>
       </div>
