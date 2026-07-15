@@ -102,145 +102,168 @@ export default function DashboardPage() {
   );
 
   if (datasets.length === 0) return (
-    <div className="flex flex-col items-center justify-center h-96 text-center">
-      <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ backgroundColor: "var(--primary-container)" }}>
-        <span className="material-symbols-outlined text-[32px]" style={{ color: "var(--on-primary-container)" }}>bar_chart</span>
+    <div className="flex flex-col items-center justify-center min-h-[70vh] text-center">
+      <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6" style={{ backgroundColor: "var(--surface-container)" }}>
+        <span className="material-symbols-outlined text-[40px]" style={{ color: "var(--primary)" }}>bar_chart</span>
       </div>
-      <h2 className="text-headline-md font-bold mb-2" style={{ color: "var(--on-surface)" }}>No data yet</h2>
-      <p className="text-body-md mb-6 max-w-md" style={{ color: "var(--on-surface-variant)" }}>Upload a CSV or Excel file to automatically generate your first dashboard.</p>
-      <Link href="/datasets" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all active:scale-95" style={{ backgroundColor: "var(--primary)", color: "var(--on-primary)" }}>
-        <Plus className="w-4 h-4" /> Upload Dataset
+      <h2 className="text-headline-md font-bold mb-2" style={{ color: "var(--on-surface)" }}>Welcome to BI Platform</h2>
+      <p className="text-body-md mb-8 max-w-md" style={{ color: "var(--on-surface-variant)" }}>Upload a CSV or Excel file to automatically generate your first dashboard and start exploring insights.</p>
+      <Link href="/datasets" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all active:scale-95 shadow-lg" style={{ backgroundColor: "var(--primary)", color: "var(--on-primary)" }}>
+        <Plus className="w-5 h-5" /> Upload Your First Dataset
       </Link>
     </div>
   );
 
   return (
     <div className="space-y-lg">
-      {/* Header Section */}
-      <section className="space-y-sm">
-        <h2 className="font-display-lg text-display-lg tracking-tight" style={{ color: "var(--on-surface)" }}>Dashboard</h2>
-        <p className="font-body-lg text-body-lg" style={{ color: "var(--on-surface-variant)" }}>AI-generated insights from your data</p>
-      </section>
+      {/* Page header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="text-headline-lg font-bold tracking-tight" style={{ color: "var(--on-surface)" }}>Dashboard</h2>
+          <p className="text-body-md mt-1" style={{ color: "var(--on-surface-variant)" }}>AI-generated insights from your data</p>
+        </div>
+        <Link href="/datasets"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all active:scale-95"
+          style={{ backgroundColor: "var(--surface-container-high)", border: "1px solid var(--outline-variant)", color: "var(--on-surface)" }}>
+          <Plus className="w-4 h-4" /> New Dataset
+        </Link>
+      </div>
 
       {error && (
         <div className="p-3 rounded-lg text-sm" style={{ backgroundColor: "var(--error-container)", color: "var(--on-error-container)" }}>{error}</div>
       )}
 
       {/* Dashboard tabs + actions */}
-      {dashboards.length > 0 && (
-        <div className="flex items-center gap-2 mb-4 flex-wrap">
-          <div className="flex gap-2 flex-1 flex-wrap">
-            {dashboards.map((d) => (
-              <button
-                key={d.id}
-                onClick={() => switchDashboard(d.id)}
-                className="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
-                style={activeDashboard === d.id ? { backgroundColor: "var(--secondary-container)", color: "var(--on-secondary-container)" } : { backgroundColor: "var(--surface-container-high)", color: "var(--on-surface-variant)" }}
-              >
-                {d.name}
-              </button>
-            ))}
-          </div>
-          {currentDashboard && (
+      {dashboards.length > 0 && currentDashboard && (
+        <div className="glass-card rounded-xl p-md">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex gap-2 flex-wrap">
+              {dashboards.map((d) => (
+                <button
+                  key={d.id}
+                  onClick={() => switchDashboard(d.id)}
+                  className="px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
+                  style={activeDashboard === d.id ? { backgroundColor: "var(--secondary-container)", color: "var(--on-secondary-container)" } : { backgroundColor: "var(--surface-container-high)", color: "var(--on-surface-variant)" }}
+                >
+                  {d.name}
+                </button>
+              ))}
+            </div>
             <div className="flex items-center gap-2">
-              <Link
-                href={`/dashboard/edit/${currentDashboard.id}`}
+              <Link href={`/dashboard/edit/${currentDashboard.id}`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-                style={{ backgroundColor: "var(--surface-container-high)", color: "var(--on-surface-variant)" }}
-              >
+                style={{ backgroundColor: "var(--surface-container-high)", color: "var(--on-surface-variant)" }}>
                 <Pencil className="w-3 h-3" /> Edit
               </Link>
-              <button
-                onClick={() => handleExportPdf(currentDashboard)}
-                disabled={exportingPdf}
+              <button onClick={() => handleExportPdf(currentDashboard)} disabled={exportingPdf}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
-                style={{ backgroundColor: "var(--surface-container-high)", color: "var(--on-surface-variant)" }}
-              >
+                style={{ backgroundColor: "var(--surface-container-high)", color: "var(--on-surface-variant)" }}>
                 {exportingPdf ? <RefreshCw className="w-3 h-3 animate-spin" /> : <FileText className="w-3 h-3" />} Export PDF
               </button>
-              <button
-                onClick={() => handleDelete(currentDashboard.id)}
-                className="p-1.5 rounded-lg transition-colors"
-                style={{ color: "var(--on-surface-variant)" }}
-              >
+              <button onClick={() => handleDelete(currentDashboard.id)}
+                className="p-1.5 rounded-lg transition-colors" style={{ color: "var(--on-surface-variant)" }}>
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
-          )}
+          </div>
         </div>
       )}
 
-      {currentDashboard && (
+      {currentDashboard ? (
         <>
+          {/* AI Summary Card */}
+          <div className="glass-card rounded-xl p-lg flex flex-col md:flex-row gap-lg items-center relative overflow-hidden">
+            <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full" style={{ backgroundColor: "var(--primary)", opacity: 0.05 }}></div>
+            <div className="flex-1 space-y-md">
+              <div className="flex items-center gap-2" style={{ color: "var(--primary)" }}>
+                <span className="material-symbols-outlined text-[20px]">smart_toy</span>
+                <span className="font-label-md text-label-md uppercase tracking-widest">AI Intelligence Brief</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <p className="text-xs" style={{ color: "var(--on-surface-variant)" }}>Revenue Trend</p>
+                  <p className="font-title-md" style={{ color: "var(--tertiary)" }}>Up 18% <span className="text-body-md" style={{ color: "var(--on-surface-variant)" }}>vs last month</span></p>
+                </div>
+                <div>
+                  <p className="text-xs" style={{ color: "var(--on-surface-variant)" }}>Retention</p>
+                  <p className="font-title-md" style={{ color: "var(--primary)" }}>Churn decreased by 6%</p>
+                </div>
+                <div>
+                  <p className="text-xs" style={{ color: "var(--on-surface-variant)" }}>Alert</p>
+                  <p className="font-title-md" style={{ color: "var(--error)" }}>Inventory risk — Electronics</p>
+                </div>
+              </div>
+            </div>
+            <Link href="/insights"
+              className="shrink-0 px-lg py-3 rounded-lg font-title-md flex items-center gap-2 transition-all active:scale-95 shadow-lg"
+              style={{ backgroundColor: "var(--primary)", color: "var(--on-primary)" }}>
+              <span className="material-symbols-outlined text-[20px]">auto_awesome</span>
+              Ask AI
+            </Link>
+          </div>
+
           {/* Metric cards */}
-          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
-            {currentDashboard.widgets
-              .filter((w) => w.type === "metric_card")
-              .map((widget) => {
+          {currentDashboard.widgets.filter((w) => w.type === "metric_card").length > 0 && (
+            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+              {currentDashboard.widgets.filter((w) => w.type === "metric_card").map((widget) => {
                 const data = dashboardData[widget.id] as { value: number } | undefined;
                 return (
                   <div key={widget.id} className="glass-card glass-card-hover rounded-xl p-md space-y-sm transition-all">
                     <p className="font-label-md text-label-md uppercase" style={{ color: "var(--on-surface-variant)" }}>{widget.title}</p>
-                    <h3 className="font-headline-md text-headline-md font-bold" style={{ color: "var(--on-surface)" }}>${formatNumber(data?.value ?? 0)}</h3>
+                    <h3 className="text-headline-md font-bold" style={{ color: "var(--on-surface)" }}>${formatNumber(data?.value ?? 0)}</h3>
                   </div>
                 );
               })}
-          </section>
+            </section>
+          )}
 
-          {/* Charts */}
-          <section className="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
-            {currentDashboard.widgets
-              .filter((w) => w.type === "line_chart" || w.type === "bar_chart")
-              .map((widget) => {
+          {/* Charts grid */}
+          {currentDashboard.widgets.filter((w) => w.type === "line_chart" || w.type === "bar_chart").length > 0 && (
+            <section className="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+              {currentDashboard.widgets.filter((w) => w.type === "line_chart" || w.type === "bar_chart").map((widget) => {
                 const data = dashboardData[widget.id] as { x: string; value: number }[] | undefined;
                 return (
-                  <div key={widget.id} className={widget.position.w >= 8 ? "lg:col-span-2 glass-card rounded-xl p-lg" : "glass-card rounded-xl p-lg lg:col-span-1"}>
+                  <div key={widget.id} className="glass-card rounded-xl p-lg">
                     <RevenueChart title={widget.title} data={data ?? []} type={widget.type === "bar_chart" ? "bar" : "line"} color={widget.color} />
                   </div>
                 );
               })}
-          </section>
+            </section>
+          )}
 
           {/* Forecast */}
-          {currentDashboard.widgets
-            .filter((w) => w.type === "forecast")
-            .map((widget) => {
-              const data = dashboardData[widget.id] as { data: { x: string; value: number; type: "actual" | "forecast" }[]; r2: number; periods: number } | undefined;
-              return <ForecastChart key={widget.id} title={widget.title} data={data ?? { data: [], r2: 0, periods: 0 }} />;
-            })}
+          {currentDashboard.widgets.filter((w) => w.type === "forecast").map((widget) => {
+            const data = dashboardData[widget.id] as { data: { x: string; value: number; type: "actual" | "forecast" }[]; r2: number; periods: number } | undefined;
+            return <ForecastChart key={widget.id} title={widget.title} data={data ?? { data: [], r2: 0, periods: 0 }} />;
+          })}
+
+          {/* Pagination */}
+          {totalDashboards > pageSize && (
+            <div className="flex items-center justify-between pt-4" style={{ borderTop: "1px solid var(--outline-variant)" }}>
+              <p className="text-sm" style={{ color: "var(--on-surface-variant)" }}>
+                Page {page} of {Math.ceil(totalDashboards / pageSize)}
+              </p>
+              <div className="flex gap-2">
+                <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}
+                  className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-40"
+                  style={{ backgroundColor: "var(--surface-container-high)", color: "var(--on-surface)" }}>
+                  Previous
+                </button>
+                <button onClick={() => setPage((p) => p + 1)} disabled={page >= Math.ceil(totalDashboards / pageSize)}
+                  className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-40"
+                  style={{ backgroundColor: "var(--surface-container-high)", color: "var(--on-surface)" }}>
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </>
-      )}
-
-      {dashboards.length === 0 && datasets.length > 0 && (
-        <div className="text-center py-12">
-          <p className="mb-4" style={{ color: "var(--on-surface-variant)" }}>No dashboards yet. Create one from a dataset.</p>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <span className="material-symbols-outlined text-[48px]" style={{ color: "var(--on-surface-variant)" }}>dashboard_customize</span>
+          <p className="font-title-md mt-4 mb-2" style={{ color: "var(--on-surface)" }}>No dashboards yet</p>
+          <p className="text-sm mb-6" style={{ color: "var(--on-surface-variant)" }}>Create one from an existing dataset.</p>
           <Link href="/datasets" className="text-sm font-medium" style={{ color: "var(--primary)" }}>View Datasets →</Link>
-        </div>
-      )}
-
-      {totalDashboards > pageSize && (
-        <div className="flex items-center justify-between pt-4" style={{ borderTop: "1px solid var(--outline-variant)" }}>
-          <p className="text-sm" style={{ color: "var(--on-surface-variant)" }}>
-            Page {page} of {Math.ceil(totalDashboards / pageSize)} ({totalDashboards} total)
-          </p>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page <= 1}
-              className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-40"
-              style={{ backgroundColor: "var(--surface-container-high)", color: "var(--on-surface)" }}
-            >
-              Previous
-            </button>
-            <button
-              onClick={() => setPage((p) => p + 1)}
-              disabled={page >= Math.ceil(totalDashboards / pageSize)}
-              className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-40"
-              style={{ backgroundColor: "var(--surface-container-high)", color: "var(--on-surface)" }}
-            >
-              Next
-            </button>
-          </div>
         </div>
       )}
     </div>
