@@ -191,6 +191,7 @@ If you need to run migrations manually (e.g., after schema changes):
 alembic upgrade head
 ```
 
+
 Tables auto-create on application startup via `Base.metadata.create_all`, but use `alembic upgrade head` explicitly for production schema changes.
 
 ---

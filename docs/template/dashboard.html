@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dashboard - JOAT Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#13131b",
+                        "inverse-surface": "#e4e1ed",
+                        "tertiary-container": "#a078ff",
+                        "on-secondary-fixed-variant": "#004395",
+                        "secondary-fixed": "#d8e2ff",
+                        "inverse-primary": "#494bd6",
+                        "surface-container-lowest": "#0d0d15",
+                        "surface-container-low": "#1b1b23",
+                        "primary": "#c0c1ff",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "on-surface-variant": "#c7c4d7",
+                        "error": "#ffb4ab",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-error": "#690005",
+                        "tertiary": "#d0bcff",
+                        "outline": "#908fa0",
+                        "on-background": "#e4e1ed",
+                        "on-secondary": "#002e6a",
+                        "inverse-on-surface": "#303038",
+                        "on-primary-fixed": "#07006c",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "on-surface": "#e4e1ed",
+                        "on-secondary-container": "#e6ecff",
+                        "secondary-container": "#0566d9",
+                        "on-tertiary-fixed": "#23005c",
+                        "outline-variant": "#464554",
+                        "tertiary-fixed": "#e9ddff",
+                        "error-container": "#93000a",
+                        "on-primary-container": "#0d0096",
+                        "surface-container-high": "#292932",
+                        "on-primary": "#1000a9",
+                        "surface-dim": "#13131b",
+                        "surface-variant": "#34343d",
+                        "surface-bright": "#393841",
+                        "surface-container-highest": "#34343d",
+                        "surface-container": "#1f1f27",
+                        "on-tertiary-container": "#340080",
+                        "on-secondary-fixed": "#001a42",
+                        "primary-container": "#8083ff",
+                        "on-tertiary": "#3c0091",
+                        "on-tertiary-fixed-variant": "#5516be",
+                        "surface-tint": "#c0c1ff",
+                        "primary-fixed": "#e1e0ff",
+                        "tertiary-fixed-dim": "#d0bcff",
+                        "surface": "#13131b",
+                        "on-error-container": "#ffdad6",
+                        "secondary": "#adc6ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "gutter": "24px",
+                        "2xl": "48px",
+                        "margin-mobile": "16px",
+                        "margin-desktop": "40px",
+                        "md": "16px",
+                        "xl": "32px",
+                        "xs": "4px",
+                        "base": "4px",
+                        "sm": "8px"
+                    },
+                    "fontFamily": {
+                        "mono-sm": ["JetBrains Mono"],
+                        "label-sm": ["Geist"],
+                        "headline-md": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "body-lg": ["Geist"],
+                        "headline-lg-mobile": ["Geist"],
+                        "body-md": ["Geist"],
+                        "display-lg": ["Geist"]
+                    },
+                    "fontSize": {
+                        "mono-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "52px", "letterSpacing": "-0.04em", "fontWeight": "700" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Geist', sans-serif; background-color: #13131b; color: #e4e1ed; }
+        .glass-panel { background: rgba(19, 19, 27, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+        .glass-card { background: rgba(41, 41, 50, 0.4); backdrop-filter: blur(8px); border: 1px solid rgba(70, 69, 84, 0.3); }
+        .ai-gradient-card { background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%); border: 1px solid rgba(139, 92, 246, 0.3); }
+        .ai-shimmer { position: relative; overflow: hidden; }
+        .ai-shimmer::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%); transform: rotate(30deg); animation: shimmer 4s infinite linear; pointer-events: none; }
+        @keyframes shimmer { 0% { transform: translateX(-100%) rotate(30deg); } 100% { transform: translateX(100%) rotate(30deg); } }
+        /* Sparkline minimal styling */
+        svg.sparkline { width: 100%; height: 40px; }
+        svg.sparkline path { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .chart-grid line { stroke: rgba(70, 69, 84, 0.2); stroke-dasharray: 4; }
+        .chart-area { fill: url(#area-gradient); opacity: 0.5; }
+        .chart-line { stroke: #c0c1ff; stroke-width: 2; fill: none; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex overflow-hidden selection:bg-primary selection:text-on-primary">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col h-full py-lg bg-background font-body-md text-body-md border-r border-outline-variant fixed h-full w-64 left-0 top-0 z-50">
+<div class="px-gutter mb-xl flex items-center gap-md">
+<div class="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30">
+<span class="material-symbols-outlined text-primary" data-icon="hub">hub</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary truncate tracking-tight">JOAT Intelligence</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Enterprise Tier</p>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto px-md space-y-sm">
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-primary font-bold border-l-2 border-primary bg-primary/10 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard" data-weight="fill" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+                Datasets
+            </a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+                Insights
+            </a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+                Team
+            </a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                Settings
+            </a>
+</div>
+<div class="px-gutter mt-auto pt-lg border-t border-outline-variant/30 space-y-sm">
+<button class="w-full flex justify-center items-center py-sm rounded-lg bg-surface-container hover:bg-surface-container-high border border-outline-variant text-on-surface transition-colors font-label-sm text-label-sm gap-sm">
+<span class="material-symbols-outlined text-[16px]" data-icon="bolt">bolt</span>
+                 Upgrade Plan
+             </button>
+<div class="flex flex-col gap-xs mt-md">
+<a class="flex items-center gap-md px-sm py-xs rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors font-label-sm text-label-sm" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="account_circle">account_circle</span> Profile
+                 </a>
+<a class="flex items-center gap-md px-sm py-xs rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors font-label-sm text-label-sm" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="help">help</span> Help
+                 </a>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 flex flex-col h-screen overflow-hidden">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center px-margin-desktop h-16 w-full sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-outline-variant shadow-sm font-body-md text-body-md text-primary">
+<div class="flex items-center gap-lg">
+<!-- Mobile Menu Trigger (hidden on desktop) -->
+<button class="md:hidden text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<span class="font-headline-md text-headline-md font-bold text-on-surface md:hidden tracking-tight">JOAT</span>
+<div class="hidden md:flex relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none group-focus-within:text-primary transition-colors" data-icon="search">search</span>
+<input class="pl-10 pr-4 py-1.5 bg-surface-container border border-outline-variant rounded-full text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 w-80 transition-all font-body-md text-body-md" placeholder="Search datasets, insights, commands..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="hidden sm:block px-4 py-1.5 rounded-full border border-outline-variant text-on-surface hover:bg-surface-container transition-colors text-label-sm font-label-sm">
+                    Theme
+                </button>
+<button class="bg-primary text-on-primary px-4 py-1.5 rounded-full hover:bg-primary/90 transition-colors shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] font-label-sm text-label-sm flex items-center gap-sm font-medium">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span> New
+                </button>
+<div class="h-6 w-px bg-outline-variant/50 mx-sm hidden sm:block"></div>
+<button class="text-on-surface-variant hover:text-primary transition-colors relative Active: scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full ring-2 ring-background"></span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors md:hidden Active: scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors hidden sm:block Active: scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="ml-sm w-8 h-8 rounded-full bg-surface-container border border-outline-variant overflow-hidden cursor-pointer">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A futuristic, high-contrast digital avatar portrait of a female executive. She is illuminated by dramatic cyan and violet lighting against a deep dark background, fitting a cyberpunk or sleek tech aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6IoAl7bP2blw9CywOtyGvcRf2sgYRurTSCj3eUdfWLEUFspKtX-5cRkfsYnI-wU22udDp5Q8sDM96yp3kzQjNH3Rh_h8--fWM0fy8wT2ioniCrViR4jnjKvIKcu1EjKoakpRcyHesV8YR9quqxdbsR_3apVTXgAbycMvPJjuY16NTivUCayBNBajlmwuyw21bIzGMoxjNczInd6V6P7jA3d4tMOjZIqwD6HpUELSj0eCFkNs17obA3g"/>
+</div>
+</div>
+</header>
+<!-- Scrollable Dashboard Content -->
+<div class="flex-1 overflow-y-auto p-margin-mobile md:p-margin-desktop space-y-xl pb-32">
+<!-- Welcome Header -->
+<section>
+<h2 class="font-display-lg text-headline-lg-mobile md:text-display-lg font-bold text-on-surface tracking-tight mb-sm">
+                    Good morning, <span class="text-primary">Sarah.</span>
+</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant flex items-center gap-sm">
+                    Revenue is up <span class="text-emerald-400 font-mono-sm text-mono-sm bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-400/20">18%</span> this month.
+                </p>
+</section>
+<!-- AI Summary Card -->
+<section class="ai-gradient-card rounded-xl p-lg ai-shimmer relative overflow-hidden">
+<div class="absolute top-0 right-0 w-64 h-64 bg-tertiary-container/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
+<div class="relative z-10">
+<div class="flex items-center gap-sm mb-md">
+<span class="material-symbols-outlined text-tertiary" data-icon="auto_awesome">auto_awesome</span>
+<h3 class="font-headline-md text-headline-md text-on-surface font-semibold">Critical Insights</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<div class="glass-card rounded-lg p-md flex items-start gap-md border-error/20">
+<div class="mt-1 w-2 h-2 rounded-full bg-error shrink-0 shadow-[0_0_8px_rgba(255,180,171,0.5)]"></div>
+<div>
+<p class="font-body-md text-body-md text-on-surface">Inventory risk detected in UK region.</p>
+<span class="font-mono-sm text-mono-sm text-error block mt-xs">Action required within 48h</span>
+</div>
+</div>
+<div class="glass-card rounded-lg p-md flex items-start gap-md border-emerald-400/20">
+<div class="mt-1 w-2 h-2 rounded-full bg-emerald-400 shrink-0 shadow-[0_0_8px_rgba(52,211,153,0.5)]"></div>
+<div>
+<p class="font-body-md text-body-md text-on-surface">Customer churn improving in SaaS segment.</p>
+<span class="font-mono-sm text-mono-sm text-emerald-400 block mt-xs">Predictive retention up 4.2%</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Metric Grid -->
+<section class="grid grid-cols-2 lg:grid-cols-5 gap-md">
+<!-- Metric 1 -->
+<div class="glass-card rounded-xl p-md flex flex-col justify-between hover:border-outline-variant transition-colors group">
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-xs">Revenue</p>
+<div class="flex items-end gap-sm">
+<h4 class="font-headline-md text-headline-md text-on-surface">$2.4M</h4>
+<span class="font-mono-sm text-mono-sm text-emerald-400 pb-1 flex items-center"><span class="material-symbols-outlined text-[14px]" data-icon="arrow_upward">arrow_upward</span>12%</span>
+</div>
+</div>
+<div class="mt-md text-primary opacity-60 group-hover:opacity-100 transition-opacity">
+<svg class="sparkline" viewbox="0 0 100 40">
+<path class="text-primary" d="M0,30 L20,25 L40,35 L60,15 L80,20 L100,5"></path>
+</svg>
+</div>
+</div>
+<!-- Metric 2 -->
+<div class="glass-card rounded-xl p-md flex flex-col justify-between hover:border-outline-variant transition-colors group">
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-xs">MRR</p>
+<div class="flex items-end gap-sm">
+<h4 class="font-headline-md text-headline-md text-on-surface">$850K</h4>
+<span class="font-mono-sm text-mono-sm text-emerald-400 pb-1 flex items-center"><span class="material-symbols-outlined text-[14px]" data-icon="arrow_upward">arrow_upward</span>5%</span>
+</div>
+</div>
+<div class="mt-md text-secondary opacity-60 group-hover:opacity-100 transition-opacity">
+<svg class="sparkline" viewbox="0 0 100 40">
+<path class="text-secondary" d="M0,35 L20,30 L40,20 L60,25 L80,10 L100,15"></path>
+</svg>
+</div>
+</div>
+<!-- Metric 3 -->
+<div class="glass-card rounded-xl p-md flex flex-col justify-between hover:border-outline-variant transition-colors group">
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-xs">ARR</p>
+<div class="flex items-end gap-sm">
+<h4 class="font-headline-md text-headline-md text-on-surface">$10.2M</h4>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant pb-1 flex items-center">Stable</span>
+</div>
+</div>
+<div class="mt-md text-outline opacity-60 group-hover:opacity-100 transition-opacity">
+<svg class="sparkline" viewbox="0 0 100 40">
+<path class="text-outline" d="M0,20 L20,22 L40,18 L60,20 L80,19 L100,20"></path>
+</svg>
+</div>
+</div>
+<!-- Metric 4 -->
+<div class="glass-card rounded-xl p-md flex flex-col justify-between hover:border-outline-variant transition-colors group">
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-xs">Conversion Rate</p>
+<div class="flex items-end gap-sm">
+<h4 class="font-headline-md text-headline-md text-on-surface">4.8%</h4>
+<span class="font-mono-sm text-mono-sm text-error pb-1 flex items-center"><span class="material-symbols-outlined text-[14px]" data-icon="arrow_downward">arrow_downward</span>1.2%</span>
+</div>
+</div>
+<div class="mt-md text-error opacity-60 group-hover:opacity-100 transition-opacity">
+<svg class="sparkline" viewbox="0 0 100 40">
+<path class="text-error" d="M0,10 L20,15 L40,5 L60,25 L80,20 L100,35"></path>
+</svg>
+</div>
+</div>
+<!-- Metric 5 -->
+<div class="glass-card rounded-xl p-md flex flex-col justify-between hover:border-outline-variant transition-colors group col-span-2 lg:col-span-1">
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-xs">Customer Growth</p>
+<div class="flex items-end gap-sm">
+<h4 class="font-headline-md text-headline-md text-on-surface">+1,204</h4>
+<span class="font-mono-sm text-mono-sm text-emerald-400 pb-1 flex items-center"><span class="material-symbols-outlined text-[14px]" data-icon="arrow_upward">arrow_upward</span>24%</span>
+</div>
+</div>
+<div class="mt-md text-tertiary opacity-60 group-hover:opacity-100 transition-opacity">
+<svg class="sparkline" viewbox="0 0 100 40">
+<path class="text-tertiary" d="M0,35 L20,38 L40,25 L60,15 L80,20 L100,5"></path>
+</svg>
+</div>
+</div>
+</section>
+<!-- Main Chart Area -->
+<section class="glass-card rounded-xl p-lg border-t border-primary/20">
+<div class="flex justify-between items-center mb-lg">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-semibold">Revenue vs. Forecast</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Q3 Fiscal Year Projection</p>
+</div>
+<div class="flex gap-sm">
+<button class="px-3 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm border border-outline-variant">1M</button>
+<button class="px-3 py-1 rounded bg-primary/20 text-primary font-label-sm text-label-sm border border-primary/30">3M</button>
+<button class="px-3 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm border border-outline-variant">YTD</button>
+</div>
+</div>
+<div class="w-full h-64 relative">
+<!-- Faux Interactive Area Chart -->
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 800 200">
+<defs>
+<lineargradient id="area-gradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#c0c1ff" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="#13131b" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<g class="chart-grid">
+<line x1="0" x2="800" y1="50" y2="50"></line>
+<line x1="0" x2="800" y1="100" y2="100"></line>
+<line x1="0" x2="800" y1="150" y2="150"></line>
+</g>
+<!-- Forecast Line (Dashed) -->
+<path class="chart-line" d="M0,160 L100,150 L200,120 L300,130 L400,90 L500,80 L600,60 L700,50 L800,20" style="stroke: #908fa0; stroke-dasharray: 6;"></path>
+<!-- Actual Revenue Area -->
+<path class="chart-area" d="M0,170 L100,140 L200,130 L300,110 L400,100 L500,70 L500,200 L0,200 Z"></path>
+<!-- Actual Revenue Line -->
+<path class="chart-line" d="M0,170 L100,140 L200,130 L300,110 L400,100 L500,70"></path>
+<!-- Current Position Marker -->
+<circle cx="500" cy="70" fill="#c0c1ff" r="6" stroke="#13131b" stroke-width="2"></circle>
+<line stroke="#c0c1ff" stroke-dasharray="4" stroke-width="1" x1="500" x2="500" y1="70" y2="200"></line>
+</svg>
+<!-- Y-Axis Labels -->
+<div class="absolute left-0 top-0 h-full flex flex-col justify-between text-on-surface-variant font-mono-sm text-mono-sm py-2 pointer-events-none">
+<span>$3M</span>
+<span>$2M</span>
+<span>$1M</span>
+<span>0</span>
+</div>
+</div>
+</section>
+<!-- Secondary Grid -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+<!-- Sales Funnel -->
+<div class="glass-card rounded-xl p-lg flex flex-col">
+<h3 class="font-headline-md text-headline-md text-on-surface font-semibold mb-md">Sales Funnel</h3>
+<div class="flex-1 flex flex-col justify-center gap-md">
+<div class="relative w-full h-8 bg-surface-container rounded-sm overflow-hidden">
+<div class="absolute top-0 left-0 h-full bg-primary" style="width: 100%;"></div>
+<span class="absolute left-sm top-1/2 -translate-y-1/2 font-mono-sm text-mono-sm text-on-primary-container z-10 font-bold mix-blend-luminosity">Leads: 12,400</span>
+</div>
+<div class="relative w-[80%] mx-auto h-8 bg-surface-container rounded-sm overflow-hidden">
+<div class="absolute top-0 left-0 h-full bg-secondary" style="width: 100%;"></div>
+<span class="absolute left-sm top-1/2 -translate-y-1/2 font-mono-sm text-mono-sm text-on-secondary-container z-10 font-bold mix-blend-luminosity">Qualified: 8,200</span>
+</div>
+<div class="relative w-[60%] mx-auto h-8 bg-surface-container rounded-sm overflow-hidden">
+<div class="absolute top-0 left-0 h-full bg-tertiary" style="width: 100%;"></div>
+<span class="absolute left-sm top-1/2 -translate-y-1/2 font-mono-sm text-mono-sm text-on-tertiary-container z-10 font-bold mix-blend-luminosity">Proposals: 4,100</span>
+</div>
+<div class="relative w-[30%] mx-auto h-8 bg-surface-container rounded-sm overflow-hidden">
+<div class="absolute top-0 left-0 h-full bg-emerald-500" style="width: 100%;"></div>
+<span class="absolute left-sm top-1/2 -translate-y-1/2 font-mono-sm text-mono-sm text-[#022c22] z-10 font-bold mix-blend-luminosity">Closed: 1,200</span>
+</div>
+</div>
+</div>
+<!-- Recent Activity Feed -->
+<div class="glass-card rounded-xl p-lg lg:col-span-1 flex flex-col">
+<h3 class="font-headline-md text-headline-md text-on-surface font-semibold mb-md">Recent Activity</h3>
+<div class="space-y-md flex-1 overflow-y-auto pr-2 custom-scrollbar">
+<div class="flex gap-md">
+<div class="mt-1 w-2 h-2 rounded-full bg-primary shrink-0"></div>
+<div>
+<p class="font-body-md text-body-md text-on-surface">Data model 'Q3_Forecast' updated by System.</p>
+<span class="font-label-sm text-label-sm text-on-surface-variant">10 mins ago</span>
+</div>
+</div>
+<div class="flex gap-md">
+<div class="mt-1 w-2 h-2 rounded-full bg-tertiary shrink-0"></div>
+<div>
+<p class="font-body-md text-body-md text-on-surface">New API integration established (Stripe).</p>
+<span class="font-label-sm text-label-sm text-on-surface-variant">1 hour ago</span>
+</div>
+</div>
+<div class="flex gap-md">
+<div class="mt-1 w-2 h-2 rounded-full bg-error shrink-0"></div>
+<div>
+<p class="font-body-md text-body-md text-on-surface">Failed sync task in European cluster.</p>
+<span class="font-label-sm text-label-sm text-on-surface-variant">3 hours ago</span>
+</div>
+</div>
+<div class="flex gap-md">
+<div class="mt-1 w-2 h-2 rounded-full bg-secondary shrink-0"></div>
+<div>
+<p class="font-body-md text-body-md text-on-surface">Weekly executive report generated.</p>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Yesterday</span>
+</div>
+</div>
+</div>
+</div>
+<!-- AI Recommendations -->
+<div class="ai-gradient-card rounded-xl p-lg flex flex-col relative overflow-hidden group">
+<div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDIiLz4KPC9zdmc+')] opacity-20 group-hover:opacity-40 transition-opacity"></div>
+<div class="flex items-center gap-sm mb-md relative z-10">
+<span class="material-symbols-outlined text-tertiary" data-icon="lightbulb">lightbulb</span>
+<h3 class="font-headline-md text-headline-md text-on-surface font-semibold">Suggested Actions</h3>
+</div>
+<div class="space-y-sm flex-1 relative z-10">
+<button class="w-full text-left p-sm rounded-lg bg-surface-container/50 border border-outline-variant/50 hover:bg-surface-container hover:border-tertiary/50 transition-all group/btn">
+<p class="font-body-md text-body-md text-on-surface group-hover/btn:text-tertiary transition-colors">Review UK supply chain logistics</p>
+<span class="font-label-sm text-label-sm text-on-surface-variant">High Impact</span>
+</button>
+<button class="w-full text-left p-sm rounded-lg bg-surface-container/50 border border-outline-variant/50 hover:bg-surface-container hover:border-tertiary/50 transition-all group/btn">
+<p class="font-body-md text-body-md text-on-surface group-hover/btn:text-tertiary transition-colors">Adjust ad spend in SaaS sector</p>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Medium Impact</span>
+</button>
+<button class="w-full text-left p-sm rounded-lg bg-surface-container/50 border border-outline-variant/50 hover:bg-surface-container hover:border-tertiary/50 transition-all group/btn">
+<p class="font-body-md text-body-md text-on-surface group-hover/btn:text-tertiary transition-colors">Run Q4 scenario analysis</p>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Strategic</span>
+</button>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- FAB: Ask AI -->
+<button class="fixed bottom-xl right-margin-desktop w-14 h-14 rounded-full bg-gradient-to-br from-primary to-tertiary text-[#0d0d15] shadow-[0_0_20px_rgba(160,120,255,0.4)] hover:shadow-[0_0_30px_rgba(160,120,255,0.6)] hover:scale-105 transition-all duration-300 flex items-center justify-center z-50 group">
+<span class="material-symbols-outlined text-[28px] group-hover:rotate-12 transition-transform" data-icon="smart_toy">smart_toy</span>
+</button>
+</body></html>

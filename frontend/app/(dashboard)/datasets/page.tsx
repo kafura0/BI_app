@@ -111,7 +111,7 @@ export default function DatasetsPage() {
           <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6" style={{ backgroundColor: "var(--surface-container)" }}>
             <span className="material-symbols-outlined text-[40px]" style={{ color: "var(--on-surface-variant)" }}>database</span>
           </div>
-          <h3 className="font-title-md mb-2" style={{ color: "var(--on-surface)" }}>No data sources yet</h3>
+          <h3 className="font-headline-md mb-2" style={{ color: "var(--on-surface)" }}>No data sources yet</h3>
           <p className="text-sm mb-6" style={{ color: "var(--on-surface-variant)" }}>Upload a CSV or Excel file to get started.</p>
           <Link href="/datasets/upload" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all active:scale-95 shadow-lg"
             style={{ backgroundColor: "var(--primary)", color: "var(--on-primary)" }}>
@@ -120,9 +120,9 @@ export default function DatasetsPage() {
           {/* Custom integration CTA */}
           <div className="mt-12 px-lg py-lg rounded-xl border-2 border-dashed" style={{ borderColor: "var(--outline-variant)" }}>
             <span className="material-symbols-outlined text-[36px]" style={{ color: "var(--on-surface-variant)" }}>hub</span>
-            <h4 className="font-title-md mt-2" style={{ color: "var(--on-surface)" }}>Need a custom integration?</h4>
+            <h4 className="font-headline-md mt-2" style={{ color: "var(--on-surface)" }}>Need a custom integration?</h4>
             <p className="text-sm mt-1 mb-4" style={{ color: "var(--on-surface-variant)" }}>Our engineering team can build custom connectors for your proprietary APIs.</p>
-            <button className="px-lg py-2 rounded-full font-label-md uppercase tracking-widest text-sm transition-all active:scale-95"
+            <button className="px-lg py-2 rounded-full font-label-sm uppercase tracking-widest text-sm transition-all active:scale-95"
               style={{ border: "1px solid var(--primary)", color: "var(--primary)" }}>
               Request Integration
             </button>
@@ -145,7 +145,7 @@ export default function DatasetsPage() {
                       {status.label}
                     </span>
                   </div>
-                  <h3 className="font-title-md mb-1" style={{ color: "var(--on-surface)" }}>{dataset.name}</h3>
+                  <h3 className="font-headline-md mb-1" style={{ color: "var(--on-surface)" }}>{dataset.name}</h3>
                   {dataset.description && <p className="text-sm mb-3 line-clamp-2" style={{ color: "var(--on-surface-variant)" }}>{dataset.description}</p>}
                   <div className="flex items-center gap-3 text-xs mb-4" style={{ color: "var(--on-surface-variant)" }}>
                     <span>{formatNumber(dataset.row_count)} rows</span>

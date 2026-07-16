@@ -6,44 +6,37 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 
 const navItems = [
-  { href: "/dashboard", icon: "dashboard", label: "Dashboard", adminOnly: false },
-  { href: "/insights", icon: "smart_toy", label: "AI Copilot", adminOnly: false },
-  { href: "/admin", icon: "monitoring", label: "Analytics", adminOnly: true },
-  { href: "/datasets", icon: "database", label: "Data Sources", adminOnly: false },
-  { href: "/team", icon: "group", label: "Team", adminOnly: false },
-  { href: "/billing", icon: "credit_card", label: "Billing", adminOnly: false },
+  { href: "/dashboard", icon: "dashboard", label: "Dashboard" },
+  { href: "/insights", icon: "insights", label: "Insights" },
+  { href: "/datasets", icon: "database", label: "Datasets" },
+  { href: "/team", icon: "group", label: "Team" },
+  { href: "/admin", icon: "settings", label: "Settings", adminOnly: true },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, organization, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <aside className="h-screen w-64 fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant flex flex-col z-50">
-      {/* Logo */}
-      <div className="px-6 py-md mb-6 mt-4">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--primary-container)" }}>
-            <span className="material-symbols-outlined text-[20px]" style={{ color: "var(--on-primary-container)" }}>bar_chart</span>
-          </div>
-          <div>
-            <h1 className="text-title-md font-bold" style={{ color: "var(--on-surface)" }}>BI Platform</h1>
-            <p className="text-[10px] font-label-md uppercase tracking-widest" style={{ color: "var(--on-surface-variant)" }}>Enterprise Analytics</p>
-          </div>
+    <nav className="hidden md:flex flex-col h-full py-lg bg-background font-body-md text-body-md border-r border-outline-variant fixed h-full w-64 left-0 top-0 z-50">
+      {/* Logo + Org */}
+      <div className="px-gutter mb-xl flex items-center gap-md">
+        <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30">
+          <span className="material-symbols-outlined text-primary" data-icon="hub">hub</span>
+        </div>
+        <div>
+          <h1 className="font-headline-md text-headline-md font-bold text-primary truncate tracking-tight">
+            {organization?.name ?? "JOAT Intelligence"}
+          </h1>
+          <p className="font-label-sm text-label-sm text-on-surface-variant">
+            {organization?.plan === "enterprise" ? "Enterprise Tier" : organization?.plan === "pro" ? "Pro Plan" : "Free Plan"}
+          </p>
         </div>
       </div>
 
-      {/* Email verification banner */}
-      {user && !user.email_verified && (
-        <div className="mx-3 mb-3 px-3 py-2 rounded-lg" style={{ backgroundColor: "var(--error-container)", color: "var(--on-error-container)" }}>
-          <p className="text-xs font-medium">Verify your email</p>
-          <p className="text-xs mt-0.5 opacity-80">Check your inbox to confirm your account.</p>
-        </div>
-      )}
-
-      {/* Navigation */}
-      <nav className="flex-1 space-y-1 px-3">
+      {/* Nav */}
+      <div className="flex-1 overflow-y-auto px-md space-y-sm">
         {navItems.filter(({ adminOnly }) => !adminOnly || user?.role === "admin").map(({ href, icon, label }) => {
           const active = pathname === href || pathname.startsWith(href + "/");
           return (
@@ -51,47 +44,47 @@ export function Sidebar() {
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-3 px-4 py-2.5 rounded-lg mx-1 transition-all duration-200",
+                "flex items-center gap-md px-md py-sm rounded-lg transition-all duration-200 ease-in-out",
                 active
                   ? "sidebar-item-active"
-                  : "hover:bg-surface-variant transition-colors duration-200"
+                  : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors"
               )}
-              style={active ? { backgroundColor: "var(--secondary-container)", color: "var(--on-secondary-container)" } : { color: "var(--on-surface-variant)" }}
             >
-              <span className="material-symbols-outlined text-[20px]">{icon}</span>
-              <span className="text-body-md">{label}</span>
+              <span className={cn("material-symbols-outlined", active ? "" : "")} style={active ? { fontVariationSettings: "'FILL' 1" } : {}}>
+                {icon}
+              </span>
+              {label}
             </Link>
           );
         })}
-      </nav>
-
-      {/* Bottom actions */}
-      <div className="px-4 py-3 space-y-2" style={{ borderTop: "1px solid var(--outline-variant)" }}>
-        <button
-          onClick={toggleTheme}
-          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors hover:bg-surface-variant"
-          style={{ color: "var(--on-surface-variant)" }}
-        >
-          <span className="material-symbols-outlined text-[20px]">{theme === "dark" ? "light_mode" : "dark_mode"}</span>
-          <span className="text-body-md">{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
-        </button>
       </div>
 
-      {/* User */}
-      <div className="px-4 pb-4 pt-3">
-        <div className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-variant transition-colors group cursor-pointer">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--primary)", color: "var(--on-primary)" }}>
-            <span className="text-sm font-medium uppercase">{user?.full_name?.[0] ?? "U"}</span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate" style={{ color: "var(--on-surface)" }}>{user?.full_name ?? "User"}</p>
-            <p className="text-xs truncate" style={{ color: "var(--on-surface-variant)" }}>{user?.email}</p>
-          </div>
-          <button onClick={(e) => { e.stopPropagation(); logout(); }} className="opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "var(--on-surface-variant)" }} title="Sign out">
-            <span className="material-symbols-outlined text-[18px]">logout</span>
+      {/* Bottom */}
+      <div className="px-gutter mt-auto pt-lg border-t border-outline-variant/30 space-y-sm">
+        <Link href="/billing"
+          className="w-full flex justify-center items-center py-sm rounded-lg bg-surface-container hover:bg-surface-container-high border border-outline-variant text-on-surface transition-colors font-label-sm text-label-sm gap-sm"
+        >
+          <span className="material-symbols-outlined text-[16px]" data-icon="bolt">bolt</span>
+          Upgrade Plan
+        </Link>
+        <div className="flex flex-col gap-xs mt-md">
+          <button onClick={toggleTheme}
+            className="flex items-center gap-md px-sm py-xs rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors font-label-sm text-label-sm"
+          >
+            <span className="material-symbols-outlined text-[18px]">{theme === "dark" ? "light_mode" : "dark_mode"}</span>
+            {theme === "dark" ? "Light Mode" : "Dark Mode"}
           </button>
+          <div className="flex items-center gap-md px-sm py-xs rounded text-on-surface-variant font-label-sm text-label-sm">
+            <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-[10px] font-bold text-on-primary shrink-0">
+              {user?.full_name?.[0] ?? "U"}
+            </div>
+            <span className="flex-1 truncate">{user?.full_name ?? "User"}</span>
+            <button onClick={logout} title="Sign out" className="hover:text-primary transition-colors">
+              <span className="material-symbols-outlined text-[18px]">logout</span>
+            </button>
+          </div>
         </div>
       </div>
-    </aside>
+    </nav>
   );
 }

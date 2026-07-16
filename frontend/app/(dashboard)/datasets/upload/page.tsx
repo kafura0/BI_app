@@ -2,7 +2,7 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useDropzone } from "react-dropzone";
-import { Upload, FileText, CheckCircle, AlertCircle, Loader2, ArrowLeft } from "lucide-react";
+import { Upload, FileText, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { datasetsApi, getErrorMessage } from "@/lib/api";
 import { formatBytes } from "@/lib/utils";
@@ -52,96 +52,102 @@ export default function UploadPage() {
 
   return (
     <div className="max-w-2xl">
-      <div className="flex items-center gap-3 mb-6">
-        <Link href="/datasets" className="text-slate-400 hover:text-white transition-colors">
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-white">Upload Dataset</h1>
-          <p className="text-slate-400 text-sm">CSV and Excel files up to 50MB</p>
+      <div className="mb-xl">
+        <div className="flex items-center gap-3 mb-sm">
+          <Link href="/datasets" className="text-on-surface-variant hover:text-primary transition-colors">
+            <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+          </Link>
+          <h1 className="font-headline-lg text-headline-lg font-bold" style={{ color: "var(--on-surface)" }}>Upload Dataset</h1>
         </div>
+        <p className="font-body-md" style={{ color: "var(--on-surface-variant)" }}>CSV and Excel files up to 50MB</p>
       </div>
 
       {success ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <CheckCircle className="w-12 h-12 text-emerald-400 mb-4" />
-          <h3 className="text-white font-semibold text-lg">Upload successful!</h3>
-          <p className="text-slate-400 text-sm mt-1">Redirecting to datasets...</p>
+          <CheckCircle className="w-12 h-12 mb-4" style={{ color: "var(--tertiary)" }} />
+          <h3 className="font-headline-md font-semibold mb-1" style={{ color: "var(--on-surface)" }}>Upload successful!</h3>
+          <p className="font-body-md" style={{ color: "var(--on-surface-variant)" }}>Redirecting to datasets...</p>
         </div>
       ) : (
-        <div className="space-y-5">
+        <div className="glass-card rounded-xl p-lg space-y-lg">
           {/* Dropzone */}
           <div
             {...getRootProps()}
-            className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors ${
-              isDragActive ? "border-indigo-500 bg-indigo-500/5" : "border-slate-700 hover:border-slate-600"
+            className={`border-2 border-dashed rounded-xl p-xl text-center cursor-pointer transition-colors ${
+              isDragActive ? "border-primary bg-primary/5" : "border-outline-variant hover:border-outline"
             }`}
+            style={{ backgroundColor: "var(--surface-container-lowest)" }}
           >
             <input {...getInputProps()} />
             {file ? (
               <div className="flex flex-col items-center gap-2">
-                <FileText className="w-10 h-10 text-indigo-400" />
-                <p className="text-white font-medium">{file.name}</p>
-                <p className="text-slate-500 text-sm">{formatBytes(file.size)}</p>
+                <FileText className="w-10 h-10" style={{ color: "var(--primary)" }} />
+                <p className="font-body-md font-medium" style={{ color: "var(--on-surface)" }}>{file.name}</p>
+                <p className="font-mono-sm text-mono-sm" style={{ color: "var(--on-surface-variant)" }}>{formatBytes(file.size)}</p>
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); setFile(null); setName(""); }}
-                  className="text-xs text-slate-500 hover:text-red-400 mt-1"
+                  className="font-label-sm text-label-sm mt-1 hover:text-error transition-colors"
+                  style={{ color: "var(--on-surface-variant)" }}
                 >
                   Remove
                 </button>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-3">
-                <div className="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center">
-                  <Upload className="w-6 h-6 text-slate-400" />
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--surface-container-high)" }}>
+                  <Upload className="w-6 h-6" style={{ color: "var(--on-surface-variant)" }} />
                 </div>
                 <div>
-                  <p className="text-white font-medium">Drop your file here</p>
-                  <p className="text-slate-500 text-sm">or click to browse</p>
+                  <p className="font-body-md font-medium" style={{ color: "var(--on-surface)" }}>Drop your file here</p>
+                  <p className="font-body-md" style={{ color: "var(--on-surface-variant)" }}>or click to browse</p>
                 </div>
-                <p className="text-slate-600 text-xs">CSV, XLSX, XLS — max 50MB</p>
+                <p className="font-mono-sm text-mono-sm" style={{ color: "var(--outline)" }}>CSV, XLSX, XLS — max 50MB</p>
               </div>
             )}
           </div>
 
           {/* Metadata */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Dataset Name *</label>
+            <label className="font-label-sm text-label-sm block mb-1.5" style={{ color: "var(--on-surface-variant)" }}>Dataset Name *</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Q3 Sales Report"
-              className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full input-glass rounded-lg px-4 py-3 font-body-md text-body-md"
+              style={{ color: "var(--on-surface)" }}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Description</label>
+            <label className="font-label-sm text-label-sm block mb-1.5" style={{ color: "var(--on-surface-variant)" }}>Description</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="What does this dataset contain?"
               rows={3}
-              className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+              className="w-full input-glass rounded-lg px-4 py-3 font-body-md text-body-md resize-none"
+              style={{ color: "var(--on-surface)" }}
             />
           </div>
 
           {error && (
-            <div className="flex items-start gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
+            <div className="flex items-start gap-2 p-3 rounded-lg text-sm" style={{ backgroundColor: "var(--error-container)", color: "var(--on-error-container)" }}>
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               {error}
             </div>
           )}
 
           <div className="flex gap-3">
-            <Link href="/datasets" className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition-colors">
+            <Link href="/datasets"
+              className="px-5 py-2.5 rounded-lg font-label-sm text-label-sm font-medium transition-colors"
+              style={{ backgroundColor: "var(--surface-container-high)", color: "var(--on-surface)" }}>
               Cancel
             </Link>
             <button
               onClick={handleUpload}
               disabled={!file || !name.trim() || uploading}
-              className="flex-1 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+              className="btn-primary flex-1 rounded-lg py-2.5 font-label-sm text-label-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {uploading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : "Upload & Process"}
             </button>

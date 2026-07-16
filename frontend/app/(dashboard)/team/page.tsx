@@ -74,7 +74,7 @@ export default function TeamPage() {
       {/* Invite card */}
       {showInvite && (
         <div className="glass-card rounded-xl p-lg">
-          <h3 className="font-title-md mb-4" style={{ color: "var(--on-surface)" }}>Invite a team member</h3>
+          <h3 className="font-headline-md mb-4" style={{ color: "var(--on-surface)" }}>Invite a team member</h3>
           <div className="flex flex-col sm:flex-row gap-3">
             <input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="colleague@company.com"
               className="flex-1 px-4 py-2.5 rounded-xl text-sm"
@@ -111,7 +111,7 @@ export default function TeamPage() {
           {members.length > 0 && (
             <div className="glass-card rounded-xl overflow-hidden">
               <div className="px-lg py-4" style={{ borderBottom: "1px solid var(--outline-variant)" }}>
-                <p className="font-title-md text-sm" style={{ color: "var(--on-surface)" }}>Members</p>
+                <p className="font-headline-md text-sm" style={{ color: "var(--on-surface)" }}>Members</p>
               </div>
               {members.map((member, i) => (
                 <div key={member.user_id} className="flex items-center gap-4 px-lg py-4" style={i < members.length - 1 ? { borderBottom: "1px solid var(--outline-variant)" } : {}}>
@@ -141,7 +141,7 @@ export default function TeamPage() {
           {members.length === 0 && !loading && (
             <div className="text-center py-16">
               <span className="material-symbols-outlined text-[48px]" style={{ color: "var(--on-surface-variant)" }}>group</span>
-              <p className="font-title-md mt-4" style={{ color: "var(--on-surface)" }}>No team members yet</p>
+              <p className="font-headline-md mt-4" style={{ color: "var(--on-surface)" }}>No team members yet</p>
               <p className="text-sm mt-1" style={{ color: "var(--on-surface-variant)" }}>Invite your colleagues to collaborate.</p>
             </div>
           )}
@@ -150,7 +150,7 @@ export default function TeamPage() {
           {invites.length > 0 && (
             <div className="glass-card rounded-xl overflow-hidden">
               <div className="px-lg py-4" style={{ borderBottom: "1px solid var(--outline-variant)" }}>
-                <p className="font-title-md text-sm" style={{ color: "var(--on-surface)" }}>Pending Invitations</p>
+                <p className="font-headline-md text-sm" style={{ color: "var(--on-surface)" }}>Pending Invitations</p>
               </div>
               {invites.map((invite, i) => (
                 <div key={invite.id} className="flex items-center gap-4 px-lg py-4" style={i < invites.length - 1 ? { borderBottom: "1px solid var(--outline-variant)" } : {}}>

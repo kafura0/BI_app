@@ -79,7 +79,7 @@ function BillingContent() {
                 </div>
               )}
               <div className="px-lg py-lg" style={{ backgroundColor: "var(--surface-container)" }}>
-                <h3 className="font-title-md font-bold" style={{ color: "var(--on-surface)" }}>{plan.name}</h3>
+                <h3 className="font-headline-md font-bold" style={{ color: "var(--on-surface)" }}>{plan.name}</h3>
                 <div className="flex items-baseline gap-1 mt-1">
                   <span className="text-headline-md font-bold" style={{ color: "var(--on-surface)" }}>{plan.price}</span>
                   <span className="text-sm" style={{ color: "var(--on-surface-variant)" }}>{plan.period}</span>
