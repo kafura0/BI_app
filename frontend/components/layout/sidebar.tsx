@@ -34,7 +34,7 @@ export function Sidebar() {
       </div>
 
       {/* Nav */}
-      <div className="flex-1 overflow-y-auto px-sm space-y-xs">
+      <div className="flex-1 overflow-y-auto px-md space-y-sm">
         {navItems.map(({ href, icon, label }) => {
           const active = pathname === href || pathname.startsWith(href + "/");
           return (

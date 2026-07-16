@@ -157,8 +157,8 @@
   }
   @keyframes shimmer { 0% { transform: translateX(-100%) rotate(30deg); } 100% { transform: translateX(100%) rotate(30deg); } }
   .btn-primary {
-    background: var(--primary);
-    color: var(--on-primary);
+    background: #6366f1;
+    color: #ffffff;
     position: relative;
     overflow: hidden;
     transition: all 0.2s ease;
@@ -171,6 +171,7 @@
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
   }
   .btn-primary:hover {
+    background: #4f46e5;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
   }

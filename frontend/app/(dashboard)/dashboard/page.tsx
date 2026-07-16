@@ -202,7 +202,7 @@ export default function DashboardPage() {
             <svg className="w-full h-[40px]" viewBox="0 0 100 40"><path d="M0,10 L20,15 L40,5 L60,25 L80,20 L100,35" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </div>
         </div>
-        <div className="glass-card rounded-xl p-md flex flex-col justify-between hover:border-outline-variant transition-colors group">
+        <div className="glass-card rounded-xl p-md flex flex-col justify-between hover:border-outline-variant transition-colors group col-span-2 lg:col-span-1">
           <div>
             <p className="font-label-sm text-label-sm text-on-surface-variant mb-xs">Customer Growth</p>
             <div className="flex items-end gap-sm">
@@ -254,7 +254,7 @@ export default function DashboardPage() {
       {currentDashboard ? (
         <>
           {/* Main Chart Area */}
-          <section className="glass-card rounded-xl p-lg" style={{ borderTop: "2px solid rgba(192,193,255,0.2)" }}>
+          <section className="glass-card rounded-xl p-lg border-t border-primary/20">
             <div className="flex justify-between items-center mb-lg">
               <div>
                 <h3 className="font-headline-md text-headline-md text-on-surface font-semibold">Revenue vs. Forecast</h3>
@@ -341,16 +341,16 @@ export default function DashboardPage() {
                 <h3 className="font-headline-md text-headline-md text-on-surface font-semibold">Suggested Actions</h3>
               </div>
               <div className="space-y-sm flex-1 relative z-10">
-                <button className="w-full text-left p-sm rounded-lg transition-all group/btn" style={{ backgroundColor: "rgba(41,41,50,0.5)", border: "1px solid var(--outline-variant)" }}>
-                  <p className="font-body-md text-body-md text-on-surface">Review UK supply chain logistics</p>
+                <button className="w-full text-left p-sm rounded-lg bg-surface-container/50 border border-outline-variant/50 hover:bg-surface-container hover:border-tertiary/50 transition-all group/btn">
+                  <p className="font-body-md text-body-md text-on-surface group-hover/btn:text-tertiary transition-colors">Review UK supply chain logistics</p>
                   <span className="font-label-sm text-label-sm text-on-surface-variant">High Impact</span>
                 </button>
-                <button className="w-full text-left p-sm rounded-lg transition-all group/btn" style={{ backgroundColor: "rgba(41,41,50,0.5)", border: "1px solid var(--outline-variant)" }}>
-                  <p className="font-body-md text-body-md text-on-surface">Adjust ad spend in SaaS sector</p>
+                <button className="w-full text-left p-sm rounded-lg bg-surface-container/50 border border-outline-variant/50 hover:bg-surface-container hover:border-tertiary/50 transition-all group/btn">
+                  <p className="font-body-md text-body-md text-on-surface group-hover/btn:text-tertiary transition-colors">Adjust ad spend in SaaS sector</p>
                   <span className="font-label-sm text-label-sm text-on-surface-variant">Medium Impact</span>
                 </button>
-                <button className="w-full text-left p-sm rounded-lg transition-all group/btn" style={{ backgroundColor: "rgba(41,41,50,0.5)", border: "1px solid var(--outline-variant)" }}>
-                  <p className="font-body-md text-body-md text-on-surface">Run Q4 scenario analysis</p>
+                <button className="w-full text-left p-sm rounded-lg bg-surface-container/50 border border-outline-variant/50 hover:bg-surface-container hover:border-tertiary/50 transition-all group/btn">
+                  <p className="font-body-md text-body-md text-on-surface group-hover/btn:text-tertiary transition-colors">Run Q4 scenario analysis</p>
                   <span className="font-label-sm text-label-sm text-on-surface-variant">Strategic</span>
                 </button>
               </div>

@@ -119,7 +119,7 @@ export default function HomePage() {
               <div className="absolute bottom-lg right-lg w-80 glass-panel rounded-xl shadow-2xl flex flex-col z-30">
                 <div className="p-sm border-b border-outline-variant bg-surface/50 rounded-t-xl flex justify-between items-center">
                   <div className="flex items-center gap-sm">
-                    <span className="material-symbols-outlined text-tertiary">auto_awesome</span>
+                    <span className="material-symbols-outlined text-tertiary" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
                     <span className="font-label-sm text-on-surface">JOAT Copilot</span>
                   </div>
                   <span className="material-symbols-outlined text-on-surface-variant text-sm cursor-pointer">close</span>
