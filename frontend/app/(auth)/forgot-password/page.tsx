@@ -35,7 +35,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden text-on-surface" style={{ backgroundColor: "var(--background)" }}>
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden text-on-surface bg-background">
       {/* Animated Background Blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-container rounded-full mix-blend-screen filter blur-[100px] opacity-20 animate-blob"></div>
@@ -61,8 +61,8 @@ export default function ForgotPasswordPage() {
 
           {sent ? (
             <div className="text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full mb-md" style={{ backgroundColor: "var(--error-container)" }}>
-                <CheckCircle2 className="w-6 h-6" style={{ color: "var(--tertiary)" }} />
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full mb-md bg-error-container">
+                <CheckCircle2 className="w-6 h-6 text-tertiary" />
               </div>
               <p className="font-body-md text-body-md text-on-surface-variant">
                 If an account exists, you&apos;ll receive a password reset email
@@ -72,7 +72,7 @@ export default function ForgotPasswordPage() {
             <>
               {/* Error */}
               {error && (
-                <div className="p-3 rounded-lg text-sm" style={{ backgroundColor: "var(--error-container)", color: "var(--on-error-container)" }}>
+                <div className="p-3 rounded-lg text-sm bg-error-container text-on-error-container">
                   {error}
                 </div>
               )}
@@ -88,7 +88,7 @@ export default function ForgotPasswordPage() {
                     placeholder="name@company.com"
                     className="input-glass w-full rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline-variant"
                   />
-                  {errors.email && <p className="mt-1 text-xs" style={{ color: "var(--error)" }}>{errors.email.message}</p>}
+                  {errors.email && <p className="mt-1 text-xs text-error">{errors.email.message}</p>}
                 </div>
 
                 <button

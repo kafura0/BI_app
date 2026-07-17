@@ -21,11 +21,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [router]);
 
   if (!ready) {
-    return <div className="min-h-screen" style={{ backgroundColor: "var(--background)" }} />;
+    return <div className="min-h-screen bg-background" />;
   }
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "var(--background)" }}>
+    <div className="flex min-h-screen bg-background">
       <Sidebar />
       <main className="flex-1 md:ml-64 flex flex-col h-screen overflow-hidden">
         {/* TopNavBar */}

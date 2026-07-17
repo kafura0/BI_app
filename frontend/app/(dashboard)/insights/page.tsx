@@ -6,9 +6,9 @@ import type { Insight, Dataset, KeyMetric } from "@/types";
 import { formatDate } from "@/lib/utils";
 
 function TrendIcon({ trend }: { trend: KeyMetric["trend"] }) {
-  if (trend === "up") return <TrendingUp className="w-3.5 h-3.5" style={{ color: "var(--tertiary)" }} />;
-  if (trend === "down") return <TrendingDown className="w-3.5 h-3.5" style={{ color: "var(--error)" }} />;
-  return <Minus className="w-3.5 h-3.5" style={{ color: "var(--on-surface-variant)" }} />;
+  if (trend === "up") return <TrendingUp className="w-3.5 h-3.5 text-tertiary" />;
+  if (trend === "down") return <TrendingDown className="w-3.5 h-3.5 text-error" />;
+  return <Minus className="w-3.5 h-3.5 text-on-surface-variant" />;
 }
 
 function InsightCard({ insight, index }: { insight: Insight; index: number }) {
@@ -208,7 +208,7 @@ export default function InsightsPage() {
       )}
 
       {error && (
-        <div className="p-md rounded-xl text-body-md font-body-md mb-xl" style={{ backgroundColor: "var(--error-container)", color: "var(--on-error-container)" }}>
+        <div className="p-md rounded-xl text-body-md font-body-md mb-xl bg-error-container text-on-error-container">
           {error}
         </div>
       )}

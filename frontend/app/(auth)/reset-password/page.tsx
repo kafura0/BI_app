@@ -60,7 +60,7 @@ function ResetContent() {
             <p className="font-body-md text-body-md text-on-surface-variant">The reset link is invalid or has expired.</p>
           </div>
         </div>
-        <div className="p-3 rounded-lg text-sm text-center" style={{ backgroundColor: "var(--error-container)", color: "var(--on-error-container)" }}>
+        <div className="p-3 rounded-lg text-sm text-center bg-error-container text-on-error-container">
           Invalid or missing reset token
         </div>
         <Link href="/forgot-password"
@@ -95,8 +95,8 @@ function ResetContent() {
 
       {done ? (
         <div className="flex flex-col items-center gap-md text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full" style={{ backgroundColor: "var(--tertiary-container)" }}>
-            <CheckCircle2 className="w-6 h-6" style={{ color: "var(--on-tertiary-container)" }} />
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-tertiary-container">
+            <CheckCircle2 className="w-6 h-6 text-on-tertiary-container" />
           </div>
           <p className="font-body-md text-body-md text-on-surface-variant">Your password has been reset successfully</p>
           <Link href="/login"
@@ -108,7 +108,7 @@ function ResetContent() {
       ) : (
         <>
           {error && (
-            <div className="p-3 rounded-lg text-sm" style={{ backgroundColor: "var(--error-container)", color: "var(--on-error-container)" }}>
+            <div className="p-3 rounded-lg text-sm bg-error-container text-on-error-container">
               {error}
             </div>
           )}
@@ -124,7 +124,7 @@ function ResetContent() {
                   placeholder="Min 8 chars, 1 digit"
                   className="input-glass w-full rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline-variant"
                 />
-                {errors.password && <p className="mt-1 text-xs" style={{ color: "var(--error)" }}>{errors.password.message}</p>}
+                {errors.password && <p className="mt-1 text-xs text-error">{errors.password.message}</p>}
               </div>
 
               <div className="flex flex-col gap-sm">
@@ -136,7 +136,7 @@ function ResetContent() {
                   placeholder="Repeat password"
                   className="input-glass w-full rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline-variant"
                 />
-                {errors.confirm_password && <p className="mt-1 text-xs" style={{ color: "var(--error)" }}>{errors.confirm_password.message}</p>}
+                {errors.confirm_password && <p className="mt-1 text-xs text-error">{errors.confirm_password.message}</p>}
               </div>
             </div>
 
@@ -164,7 +164,7 @@ function ResetContent() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden text-on-surface" style={{ backgroundColor: "var(--background)" }}>
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden text-on-surface bg-background">
       {/* Animated Background Blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-container rounded-full mix-blend-screen filter blur-[100px] opacity-20 animate-blob"></div>
@@ -176,8 +176,8 @@ export default function ResetPasswordPage() {
       <main className="w-full max-w-md p-margin-mobile md:p-0 z-10 relative">
         <div className="glass-panel rounded-xl p-8 md:p-xl flex flex-col gap-xl">
           <Suspense fallback={
-            <div className="flex items-center justify-center" style={{ height: "280px" }}>
-              <Loader2 className="w-6 h-6 animate-spin" style={{ color: "var(--primary)" }} />
+            <div className="flex items-center justify-center h-[280px]">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
             </div>
           }>
             <ResetContent />

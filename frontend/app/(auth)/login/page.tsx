@@ -42,7 +42,7 @@ function LoginContent() {
 
       {/* Error */}
       {error && (
-        <div className="p-3 rounded-lg text-sm" style={{ backgroundColor: "var(--error-container)", color: "var(--on-error-container)" }}>
+        <div className="p-3 rounded-lg text-sm bg-error-container text-on-error-container">
           {error}
         </div>
       )}
@@ -54,7 +54,7 @@ function LoginContent() {
             <label className="font-label-sm text-label-sm text-on-surface-variant">Email Address</label>
             <input {...register("email")} type="email" autoComplete="email" placeholder="name@company.com"
               className="input-glass w-full rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline-variant" />
-            {errors.email && <p className="mt-1 text-xs" style={{ color: "var(--error)" }}>{errors.email.message}</p>}
+            {errors.email && <p className="mt-1 text-xs text-error">{errors.email.message}</p>}
           </div>
           <div className="flex flex-col gap-sm">
             <div className="flex justify-between items-center">
@@ -63,7 +63,7 @@ function LoginContent() {
             </div>
             <input {...register("password")} type="password" autoComplete="current-password" placeholder="••••••••"
               className="input-glass w-full rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline-variant" />
-            {errors.password && <p className="mt-1 text-xs" style={{ color: "var(--error)" }}>{errors.password.message}</p>}
+            {errors.password && <p className="mt-1 text-xs text-error">{errors.password.message}</p>}
           </div>
         </div>
         <button type="submit" disabled={isLoading}
@@ -118,7 +118,7 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden text-on-surface" style={{ backgroundColor: "var(--background)" }}>
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden text-on-surface bg-background">
       {/* Animated Background Blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-container rounded-full mix-blend-screen filter blur-[100px] opacity-20 animate-blob"></div>
@@ -130,8 +130,8 @@ export default function LoginPage() {
       <main className="w-full max-w-md p-margin-mobile md:p-0 z-10 relative">
         <div className="glass-panel rounded-xl p-8 md:p-xl flex flex-col gap-xl">
           <Suspense fallback={
-            <div className="flex items-center justify-center" style={{ height: "280px" }}>
-              <Loader2 className="w-6 h-6 animate-spin" style={{ color: "var(--primary)" }} />
+            <div className="flex items-center justify-center h-[280px]">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
             </div>
           }>
             <LoginContent />

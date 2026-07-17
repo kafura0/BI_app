@@ -10,13 +10,13 @@ function StatCard({ label, value, icon: Icon, color, trend }: { label: string; v
   return (
     <div className="glass-card rounded-xl p-lg">
       <div className="flex justify-between items-start mb-3">
-        <p className="font-label-sm text-label-sm uppercase" style={{ color: "var(--on-surface-variant)" }}>{label}</p>
+        <p className="font-label-sm text-label-sm uppercase text-on-surface-variant">{label}</p>
         <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: color + "15" }}>
           <Icon className="w-4 h-4" style={{ color }} />
         </div>
       </div>
       <div className="flex items-end gap-2">
-        <p className="text-headline-md font-bold" style={{ color: "var(--on-surface)" }}>{typeof value === "number" ? formatNumber(value) : value}</p>
+        <p className="text-headline-md font-bold text-on-surface">{typeof value === "number" ? formatNumber(value) : value}</p>
         {trend && (
           <span className="font-label-sm mb-1 flex items-center" style={{ color: trend.dir === "up" ? "var(--tertiary)" : "var(--error)" }}>
             <span className="material-symbols-outlined text-[14px]">{trend.dir === "up" ? "trending_up" : "trending_down"}</span>
@@ -52,12 +52,11 @@ export default function AdminPage() {
       {/* Header */}
       <div className="flex items-end justify-between">
         <div>
-          <h2 className="text-headline-lg font-bold tracking-tight" style={{ color: "var(--on-surface)" }}>Performance Analytics</h2>
-          <p className="text-body-md mt-1" style={{ color: "var(--on-surface-variant)" }}>Real-time enterprise core growth metrics and behavioral data.</p>
+          <h2 className="text-headline-lg font-bold tracking-tight text-on-surface">Performance Analytics</h2>
+          <p className="text-body-md mt-1 text-on-surface-variant">Real-time enterprise core growth metrics and behavioral data.</p>
         </div>
         <select value={period} onChange={(e) => setPeriod(Number(e.target.value))}
-          className="px-3 py-2 rounded-lg text-sm"
-          style={{ backgroundColor: "var(--surface-container-high)", border: "1px solid var(--outline-variant)", color: "var(--on-surface)" }}>
+          className="px-3 py-2 rounded-lg text-sm bg-surface-container-high border border-outline-variant text-on-surface">
           <option value={7}>Last 7 days</option>
           <option value={30}>Last 30 days</option>
           <option value={90}>Last 90 days</option>
@@ -65,28 +64,28 @@ export default function AdminPage() {
       </div>
 
       {error && (
-        <div className="p-3 rounded-lg text-sm" style={{ backgroundColor: "var(--error-container)", color: "var(--on-error-container)" }}>
+        <div className="p-3 rounded-lg text-sm bg-error-container text-on-error-container">
           {error}
           {error.includes("Admin") && <span className="block mt-1 text-xs opacity-80">Admin role required to view analytics.</span>}
         </div>
       )}
 
       {loading ? (
-        <div className="flex justify-center py-24"><RefreshCw className="w-6 h-6 animate-spin" style={{ color: "var(--primary)" }} /></div>
+        <div className="flex justify-center py-24"><RefreshCw className="w-6 h-6 animate-spin text-primary" /></div>
       ) : stats ? (
         <>
           {/* Queries remaining banner */}
           <div className="glass-card rounded-xl p-lg flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: "var(--primary-container)" }}>
-                <Zap className="w-5 h-5" style={{ color: "var(--on-primary-container)" }} />
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary-container">
+                <Zap className="w-5 h-5 text-on-primary-container" />
               </div>
               <div>
-                <p className="font-headline-md" style={{ color: "var(--on-surface)" }}>AI Queries Remaining Today</p>
-                <p className="text-xs" style={{ color: "var(--on-surface-variant)" }}>Resets at midnight UTC</p>
+                <p className="font-headline-md text-on-surface">AI Queries Remaining Today</p>
+                <p className="text-xs text-on-surface-variant">Resets at midnight UTC</p>
               </div>
             </div>
-            <span className="text-headline-lg font-bold" style={{ color: "var(--primary)" }}>{formatNumber(stats.queries_remaining_today)}</span>
+            <span className="text-headline-lg font-bold text-primary">{formatNumber(stats.queries_remaining_today)}</span>
           </div>
 
           {/* KPI grid */}
@@ -100,7 +99,7 @@ export default function AdminPage() {
           {/* Charts row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
             <div className="glass-card rounded-xl p-lg">
-              <h3 className="font-headline-md mb-6" style={{ color: "var(--on-surface)" }}>AI Queries Over Time</h3>
+              <h3 className="font-headline-md mb-6 text-on-surface">AI Queries Over Time</h3>
               <RevenueChart
                 title=""
                 data={stats.queries_by_day.map((d) => ({ x: d.date, value: d.value }))}
@@ -109,7 +108,7 @@ export default function AdminPage() {
               />
             </div>
             <div className="glass-card rounded-xl p-lg">
-              <h3 className="font-headline-md mb-6" style={{ color: "var(--on-surface)" }}>Plan Usage</h3>
+              <h3 className="font-headline-md mb-6 text-on-surface">Plan Usage</h3>
               <div className="space-y-5">
                 {[
                   { label: "AI Queries (30d)", used: stats.total_queries, limit: stats.plan === "free" ? 600 : 15000, color: "var(--primary)" },

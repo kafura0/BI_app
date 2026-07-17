@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, RefreshCw, Pencil, FileText, Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { dashboardsApi, datasetsApi, getErrorMessage } from "@/lib/api";
 import type { Dashboard, Dataset } from "@/types";
 import { RevenueChart } from "@/components/charts/revenue-chart";
@@ -102,12 +103,12 @@ export default function DashboardPage() {
 
   if (datasets.length === 0) return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] text-center">
-      <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6" style={{ backgroundColor: "var(--surface-container)" }}>
-        <span className="material-symbols-outlined text-[40px]" style={{ color: "var(--primary)" }}>bar_chart</span>
+      <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6 bg-surface-container">
+        <span className="material-symbols-outlined text-[40px] text-primary">bar_chart</span>
       </div>
-      <h2 className="text-headline-md font-bold mb-2" style={{ color: "var(--on-surface)" }}>Welcome to BI Platform</h2>
-      <p className="text-body-md mb-8 max-w-md" style={{ color: "var(--on-surface-variant)" }}>Upload a CSV or Excel file to automatically generate your first dashboard and start exploring insights.</p>
-      <Link href="/datasets" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all active:scale-95 shadow-lg" style={{ backgroundColor: "var(--primary)", color: "var(--on-primary)" }}>
+      <h2 className="text-headline-md font-bold mb-2 text-on-surface">Welcome to BI Platform</h2>
+      <p className="text-body-md mb-8 max-w-md text-on-surface-variant">Upload a CSV or Excel file to automatically generate your first dashboard and start exploring insights.</p>
+      <Link href="/datasets" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all active:scale-95 shadow-lg bg-primary text-on-primary">
         <Plus className="w-5 h-5" /> Upload Your First Dataset
       </Link>
     </div>
@@ -217,7 +218,7 @@ export default function DashboardPage() {
       </section>
 
       {error && (
-        <div className="p-3 rounded-lg text-sm" style={{ backgroundColor: "var(--error-container)", color: "var(--on-error-container)" }}>{error}</div>
+        <div className="p-3 rounded-lg text-sm bg-error-container text-on-error-container">{error}</div>
       )}
 
       {/* Dashboard tabs + actions */}
@@ -227,23 +228,27 @@ export default function DashboardPage() {
             <div className="flex gap-2 flex-wrap">
               {dashboards.map((d) => (
                 <button key={d.id} onClick={() => switchDashboard(d.id)}
-                  className="px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
-                  style={activeDashboard === d.id ? { backgroundColor: "var(--secondary-container)", color: "var(--on-secondary-container)" } : { backgroundColor: "var(--surface-container-high)", color: "var(--on-surface-variant)" }}>
+                  className={cn(
+                    "px-4 py-1.5 rounded-lg text-sm font-medium transition-all",
+                    activeDashboard === d.id
+                      ? "bg-secondary-container text-on-secondary-container"
+                      : "bg-surface-container-high text-on-surface-variant"
+                  )}>
                   {d.name}
                 </button>
               ))}
             </div>
             <div className="flex items-center gap-2">
               <Link href={"/dashboard/edit/" + currentDashboard.id}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors" style={{ backgroundColor: "var(--surface-container-high)", color: "var(--on-surface-variant)" }}>
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors bg-surface-container-high text-on-surface-variant">
                 <Pencil className="w-3 h-3" /> Edit
               </Link>
               <button onClick={() => handleExportPdf(currentDashboard)} disabled={exportingPdf}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-50" style={{ backgroundColor: "var(--surface-container-high)", color: "var(--on-surface-variant)" }}>
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 bg-surface-container-high text-on-surface-variant">
                 {exportingPdf ? <RefreshCw className="w-3 h-3 animate-spin" /> : <FileText className="w-3 h-3" />} Export PDF
               </button>
               <button onClick={() => handleDelete(currentDashboard.id)}
-                className="p-1.5 rounded-lg transition-colors" style={{ color: "var(--on-surface-variant)" }}>
+                className="p-1.5 rounded-lg transition-colors text-on-surface-variant">
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
@@ -283,21 +288,21 @@ export default function DashboardPage() {
             <div className="glass-card rounded-xl p-lg flex flex-col">
               <h3 className="font-headline-md text-headline-md text-on-surface font-semibold mb-md">Sales Funnel</h3>
               <div className="flex-1 flex flex-col justify-center gap-md">
-                <div className="relative w-full h-8 rounded-sm overflow-hidden" style={{ backgroundColor: "var(--surface-container)" }}>
-                  <div className="absolute top-0 left-0 h-full" style={{ width: "100%", backgroundColor: "var(--primary)" }}></div>
-                  <span className="absolute left-sm top-1/2 -translate-y-1/2 font-mono-sm text-mono-sm z-10 font-bold mix-blend-luminosity" style={{ color: "var(--on-primary-container)" }}>Leads: 12,400</span>
+                <div className="relative w-full h-8 rounded-sm overflow-hidden bg-surface-container">
+                  <div className="absolute top-0 left-0 h-full w-full bg-primary"></div>
+                  <span className="absolute left-sm top-1/2 -translate-y-1/2 font-mono-sm text-mono-sm z-10 font-bold mix-blend-luminosity text-on-primary-container">Leads: 12,400</span>
                 </div>
-                <div className="relative w-[80%] mx-auto h-8 rounded-sm overflow-hidden" style={{ backgroundColor: "var(--surface-container)" }}>
-                  <div className="absolute top-0 left-0 h-full" style={{ width: "100%", backgroundColor: "var(--secondary)" }}></div>
-                  <span className="absolute left-sm top-1/2 -translate-y-1/2 font-mono-sm text-mono-sm z-10 font-bold mix-blend-luminosity" style={{ color: "var(--on-secondary-container)" }}>Qualified: 8,200</span>
+                <div className="relative w-[80%] mx-auto h-8 rounded-sm overflow-hidden bg-surface-container">
+                  <div className="absolute top-0 left-0 h-full w-full bg-secondary"></div>
+                  <span className="absolute left-sm top-1/2 -translate-y-1/2 font-mono-sm text-mono-sm z-10 font-bold mix-blend-luminosity text-on-secondary-container">Qualified: 8,200</span>
                 </div>
-                <div className="relative w-[60%] mx-auto h-8 rounded-sm overflow-hidden" style={{ backgroundColor: "var(--surface-container)" }}>
-                  <div className="absolute top-0 left-0 h-full" style={{ width: "100%", backgroundColor: "var(--tertiary)" }}></div>
-                  <span className="absolute left-sm top-1/2 -translate-y-1/2 font-mono-sm text-mono-sm z-10 font-bold mix-blend-luminosity" style={{ color: "var(--on-tertiary-container)" }}>Proposals: 4,100</span>
+                <div className="relative w-[60%] mx-auto h-8 rounded-sm overflow-hidden bg-surface-container">
+                  <div className="absolute top-0 left-0 h-full w-full bg-tertiary"></div>
+                  <span className="absolute left-sm top-1/2 -translate-y-1/2 font-mono-sm text-mono-sm z-10 font-bold mix-blend-luminosity text-on-tertiary-container">Proposals: 4,100</span>
                 </div>
-                <div className="relative w-[30%] mx-auto h-8 rounded-sm overflow-hidden" style={{ backgroundColor: "var(--surface-container)" }}>
-                  <div className="absolute top-0 left-0 h-full" style={{ width: "100%", backgroundColor: "#10b981" }}></div>
-                  <span className="absolute left-sm top-1/2 -translate-y-1/2 font-mono-sm text-mono-sm z-10 font-bold mix-blend-luminosity" style={{ color: "#022c22" }}>Closed: 1,200</span>
+                <div className="relative w-[30%] mx-auto h-8 rounded-sm overflow-hidden bg-surface-container">
+                  <div className="absolute top-0 left-0 h-full w-full bg-[#10b981]"></div>
+                  <span className="absolute left-sm top-1/2 -translate-y-1/2 font-mono-sm text-mono-sm z-10 font-bold mix-blend-luminosity text-[#022c22]">Closed: 1,200</span>
                 </div>
               </div>
             </div>
@@ -305,28 +310,28 @@ export default function DashboardPage() {
               <h3 className="font-headline-md text-headline-md text-on-surface font-semibold mb-md">Recent Activity</h3>
               <div className="space-y-md flex-1 overflow-y-auto pr-2">
                 <div className="flex gap-md">
-                  <div className="mt-1 w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: "var(--primary)" }}></div>
+                  <div className="mt-1 w-2 h-2 rounded-full shrink-0 bg-primary"></div>
                   <div>
                     <p className="font-body-md text-body-md text-on-surface">Data model &apos;Q3_Forecast&apos; updated by System.</p>
                     <span className="font-label-sm text-label-sm text-on-surface-variant">10 mins ago</span>
                   </div>
                 </div>
                 <div className="flex gap-md">
-                  <div className="mt-1 w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: "var(--tertiary)" }}></div>
+                  <div className="mt-1 w-2 h-2 rounded-full shrink-0 bg-tertiary"></div>
                   <div>
                     <p className="font-body-md text-body-md text-on-surface">New API integration established (Stripe).</p>
                     <span className="font-label-sm text-label-sm text-on-surface-variant">1 hour ago</span>
                   </div>
                 </div>
                 <div className="flex gap-md">
-                  <div className="mt-1 w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: "var(--error)" }}></div>
+                  <div className="mt-1 w-2 h-2 rounded-full shrink-0 bg-error"></div>
                   <div>
                     <p className="font-body-md text-body-md text-on-surface">Failed sync task in European cluster.</p>
                     <span className="font-label-sm text-label-sm text-on-surface-variant">3 hours ago</span>
                   </div>
                 </div>
                 <div className="flex gap-md">
-                  <div className="mt-1 w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: "var(--secondary)" }}></div>
+                  <div className="mt-1 w-2 h-2 rounded-full shrink-0 bg-secondary"></div>
                   <div>
                     <p className="font-body-md text-body-md text-on-surface">Weekly executive report generated.</p>
                     <span className="font-label-sm text-label-sm text-on-surface-variant">Yesterday</span>
@@ -359,23 +364,23 @@ export default function DashboardPage() {
 
           {/* Pagination */}
           {totalDashboards > pageSize && (
-            <div className="flex items-center justify-between pt-4" style={{ borderTop: "1px solid var(--outline-variant)" }}>
-              <p className="text-sm" style={{ color: "var(--on-surface-variant)" }}>Page {page} of {Math.ceil(totalDashboards / pageSize)}</p>
+            <div className="flex items-center justify-between pt-4 border-t border-outline-variant">
+              <p className="text-sm text-on-surface-variant">Page {page} of {Math.ceil(totalDashboards / pageSize)}</p>
               <div className="flex gap-2">
                 <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}
-                  className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-40" style={{ backgroundColor: "var(--surface-container-high)", color: "var(--on-surface)" }}>Previous</button>
+                  className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-40 bg-surface-container-high text-on-surface">Previous</button>
                 <button onClick={() => setPage((p) => p + 1)} disabled={page >= Math.ceil(totalDashboards / pageSize)}
-                  className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-40" style={{ backgroundColor: "var(--surface-container-high)", color: "var(--on-surface)" }}>Next</button>
+                  className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-40 bg-surface-container-high text-on-surface">Next</button>
               </div>
             </div>
           )}
         </>
       ) : (
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <span className="material-symbols-outlined text-[48px]" style={{ color: "var(--on-surface-variant)" }}>dashboard_customize</span>
-          <p className="font-headline-md mt-4 mb-2" style={{ color: "var(--on-surface)" }}>No dashboards yet</p>
-          <p className="font-body-md mb-6" style={{ color: "var(--on-surface-variant)" }}>Create one from an existing dataset.</p>
-          <Link href="/datasets" className="font-body-md font-medium" style={{ color: "var(--primary)" }}>View Datasets →</Link>
+          <span className="material-symbols-outlined text-[48px] text-on-surface-variant">dashboard_customize</span>
+          <p className="font-headline-md mt-4 mb-2 text-on-surface">No dashboards yet</p>
+          <p className="font-body-md mb-6 text-on-surface-variant">Create one from an existing dataset.</p>
+          <Link href="/datasets" className="font-body-md font-medium text-primary">View Datasets →</Link>
         </div>
       )}
 
