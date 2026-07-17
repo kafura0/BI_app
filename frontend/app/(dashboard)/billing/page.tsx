@@ -95,9 +95,8 @@ function BillingContent() {
                 </ul>
                 <button onClick={() => handleUpgrade(plan.id)} disabled={isCurrent || plan.ctaDisabled || loading === plan.id}
                   className={`mt-6 w-full py-2.5 rounded-lg text-sm font-semibold transition-all active:scale-95 flex items-center justify-center gap-2 ${
-                    isCurrent ? "cursor-default opacity-60" : ""
-                  }`}
-                  className={isCurrent ? "bg-surface-container-high text-on-surface-variant cursor-default opacity-60" : "bg-primary text-on-primary"}>
+                    isCurrent ? "bg-surface-container-high text-on-surface-variant cursor-default opacity-60" : "bg-primary text-on-primary"
+                  }`}>
                   {loading === plan.id ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                   {isCurrent ? "Current Plan" : plan.cta}
                 </button>

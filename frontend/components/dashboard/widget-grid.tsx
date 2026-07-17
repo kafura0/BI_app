@@ -18,7 +18,7 @@ const WIDGET_TYPE_LABELS: Record<WidgetConfig["type"], string> = {
   forecast: "Forecast",
 };
 
-const WIDGET_COLORS = ["#6366f1", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444", "#06b6d4"];
+const WIDGET_COLORS = ["#c0c1ff", "#d0bcff", "#adc6ff", "#10b981", "#ffb4ab", "#a078ff"];
 
 interface WidgetGridProps {
   widgets: WidgetConfig[];
@@ -48,16 +48,16 @@ function AddWidgetModal({ columns, onAdd, onClose }: AddWidgetModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-md">
-        <h3 className="text-white font-semibold text-lg mb-4">Add Widget</h3>
+      <div className="bg-surface-container border border-outline-variant rounded-2xl p-6 w-full max-w-md">
+        <h3 className="text-on-surface font-semibold text-lg mb-4">Add Widget</h3>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-slate-400 text-sm mb-1.5">Widget Type</label>
+            <label className="block text-on-surface-variant text-sm mb-1.5">Widget Type</label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value as WidgetConfig["type"])}
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full bg-surface-container-high border border-outline-variant text-on-surface rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
               {Object.entries(WIDGET_TYPE_LABELS).map(([k, v]) => (
                 <option key={k} value={k}>{v}</option>
@@ -66,34 +66,34 @@ function AddWidgetModal({ columns, onAdd, onClose }: AddWidgetModalProps) {
           </div>
 
           <div>
-            <label className="block text-slate-400 text-sm mb-1.5">Title</label>
+            <label className="block text-on-surface-variant text-sm mb-1.5">Title</label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={WIDGET_TYPE_LABELS[type]}
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full bg-surface-container-high border border-outline-variant text-on-surface rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
           {type !== "metric_card" && type !== "table" && (
             <div>
-              <label className="block text-slate-400 text-sm mb-1.5">X Axis / Category</label>
-              <select value={xCol} onChange={(e) => setXCol(e.target.value)} className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <label className="block text-on-surface-variant text-sm mb-1.5">X Axis / Category</label>
+              <select value={xCol} onChange={(e) => setXCol(e.target.value)} className="w-full bg-surface-container-high border border-outline-variant text-on-surface rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
                 {columns.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
           )}
 
           <div>
-            <label className="block text-slate-400 text-sm mb-1.5">Y Axis / Value Column</label>
-            <select value={yCol} onChange={(e) => setYCol(e.target.value)} className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <label className="block text-on-surface-variant text-sm mb-1.5">Y Axis / Value Column</label>
+            <select value={yCol} onChange={(e) => setYCol(e.target.value)} className="w-full bg-surface-container-high border border-outline-variant text-on-surface rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
               {columns.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
 
           <div>
-            <label className="block text-slate-400 text-sm mb-1.5">Aggregation</label>
-            <select value={agg} onChange={(e) => setAgg(e.target.value as WidgetConfig["aggregation"])} className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <label className="block text-on-surface-variant text-sm mb-1.5">Aggregation</label>
+            <select value={agg} onChange={(e) => setAgg(e.target.value as WidgetConfig["aggregation"])} className="w-full bg-surface-container-high border border-outline-variant text-on-surface rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
               {["sum", "avg", "count", "max", "min"].map((a) => (
                 <option key={a} value={a}>{a.toUpperCase()}</option>
               ))}
@@ -102,10 +102,10 @@ function AddWidgetModal({ columns, onAdd, onClose }: AddWidgetModalProps) {
         </div>
 
         <div className="flex gap-3 mt-6">
-          <button onClick={onClose} className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm font-medium transition-colors">
+          <button onClick={onClose} className="flex-1 py-2 bg-surface-container-high hover:bg-surface-container-highest text-on-surface rounded-lg text-sm font-medium transition-colors">
             Cancel
           </button>
-          <button onClick={handleAdd} className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-colors">
+          <button onClick={handleAdd} className="flex-1 py-2 bg-primary text-on-primary hover:bg-primary/90 rounded-lg text-sm font-medium transition-colors">
             Add Widget
           </button>
         </div>
@@ -180,7 +180,7 @@ export function WidgetGrid({ widgets, columns, onChange, readOnly = false, widge
         <div className="flex justify-end mb-4">
           <button
             onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-on-primary hover:bg-primary/90 text-sm font-medium rounded-lg transition-colors"
           >
             <Plus className="w-4 h-4" /> Add Widget
           </button>
@@ -188,10 +188,10 @@ export function WidgetGrid({ widgets, columns, onChange, readOnly = false, widge
       )}
 
       {widgets.length === 0 ? (
-        <div className="border-2 border-dashed border-slate-700 rounded-xl p-16 text-center">
-          <p className="text-slate-500 mb-4">No widgets yet</p>
+        <div className="border-2 border-dashed border-outline-variant rounded-xl p-16 text-center">
+          <p className="text-on-surface-variant mb-4">No widgets yet</p>
           {!readOnly && (
-            <button onClick={() => setShowAddModal(true)} className="text-indigo-400 hover:text-indigo-300 text-sm font-medium">
+            <button onClick={() => setShowAddModal(true)} className="text-primary hover:text-primary/80 text-sm font-medium">
               + Add your first widget
             </button>
           )}
@@ -209,19 +209,19 @@ export function WidgetGrid({ widgets, columns, onChange, readOnly = false, widge
           draggableHandle=".drag-handle"
         >
           {widgets.map((widget) => (
-            <div key={widget.id} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden flex flex-col">
-              <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-800">
+            <div key={widget.id} className="glass-card rounded-xl overflow-hidden flex flex-col">
+              <div className="flex items-center gap-2 px-3 py-2 border-b border-outline-variant/30">
                 {!readOnly && (
-                  <div className="drag-handle cursor-move text-slate-600 hover:text-slate-400">
+                  <div className="drag-handle cursor-move text-on-surface-variant hover:text-on-surface transition-colors">
                     <GripVertical className="w-4 h-4" />
                   </div>
                 )}
-                <span className="text-white text-sm font-medium flex-1 truncate">{widget.title}</span>
-                <span className="text-xs text-slate-500 px-1.5 py-0.5 bg-slate-800 rounded">
+                <span className="text-on-surface text-sm font-medium flex-1 truncate">{widget.title}</span>
+                <span className="text-xs text-on-surface-variant px-1.5 py-0.5 bg-surface-container-high rounded">
                   {WIDGET_TYPE_LABELS[widget.type]}
                 </span>
                 {!readOnly && (
-                  <button onClick={() => handleRemove(widget.id)} className="text-slate-600 hover:text-red-400 transition-colors ml-1">
+                  <button onClick={() => handleRemove(widget.id)} className="text-on-surface-variant hover:text-error transition-colors ml-1">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 )}
@@ -253,13 +253,13 @@ export function WidgetGrid({ widgets, columns, onChange, readOnly = false, widge
                     data={(widgetData?.[widget.id] as { data: Array<{ x: string; value: number; type: "actual" | "forecast" }>; r2: number; periods: number } | undefined) ?? { data: [], r2: 0, periods: 0 }}
                   />
                 ) : (
-                  <div className="flex-1 flex items-center justify-center text-slate-600 text-xs p-4">
+                  <div className="flex-1 flex items-center justify-center text-on-surface-variant text-xs p-4">
                     <div className="text-center">
-                      <div className="w-8 h-8 rounded-lg mx-auto mb-2 flex items-center justify-center" style={{ backgroundColor: `${widget.color}20` }}>
+                      <div className="w-8 h-8 rounded-lg mx-auto mb-2 flex items-center justify-center bg-surface-container-high">
                         <div className="w-3 h-3 rounded" style={{ backgroundColor: widget.color }} />
                       </div>
-                      <p className="text-slate-500">{widget.y_column ?? "—"}</p>
-                      {widget.x_column && <p className="text-slate-700 text-xs mt-0.5">by {widget.x_column}</p>}
+                      <p className="text-on-surface-variant">{widget.y_column ?? "—"}</p>
+                      {widget.x_column && <p className="text-on-surface-variant/60 text-xs mt-0.5">by {widget.x_column}</p>}
                     </div>
                   </div>
                 )}

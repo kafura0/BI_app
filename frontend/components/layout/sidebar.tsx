@@ -66,18 +66,19 @@ export function Sidebar() {
           Upgrade Plan
         </button>
         <div className="flex flex-col gap-xs mt-md">
-          <Link href="#"
+          <Link href="/dashboard"
             className="flex items-center gap-md px-sm py-xs rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors font-label-sm text-label-sm"
           >
             <span className="material-symbols-outlined text-[18px]" data-icon="account_circle">account_circle</span>
             Profile
           </Link>
-          <Link href="#"
+          <a href="https://docs.joatintelligence.com" target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-md px-sm py-xs rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors font-label-sm text-label-sm"
           >
             <span className="material-symbols-outlined text-[18px]" data-icon="help">help</span>
             Help
-          </Link>
+            <span className="material-symbols-outlined text-[12px] ml-auto opacity-50">open_in_new</span>
+          </a>
           <div
             className="flex items-center gap-md px-sm py-xs rounded text-on-surface-variant font-label-sm text-label-sm cursor-pointer hover:text-on-surface hover:bg-surface-container-high transition-colors"
             onClick={logout}

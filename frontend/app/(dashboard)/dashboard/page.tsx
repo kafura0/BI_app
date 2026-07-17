@@ -7,8 +7,10 @@ import { dashboardsApi, datasetsApi, getErrorMessage } from "@/lib/api";
 import type { Dashboard, Dataset } from "@/types";
 import { RevenueChart } from "@/components/charts/revenue-chart";
 import { ForecastChart } from "@/components/charts/forecast-chart";
+import { MetricsCard } from "@/components/charts/metrics-card";
 import { downloadWithAuth } from "@/lib/download";
 import { useToast } from "@/components/ui/toast";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function DashboardPage() {
   const [dashboards, setDashboards] = useState<Dashboard[]>([]);
@@ -22,6 +24,7 @@ export default function DashboardPage() {
   const [totalDashboards, setTotalDashboards] = useState(0);
   const pageSize = 20;
   const { error: toastError, success: toastSuccess } = useToast();
+  const { user } = useAuth();
 
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
@@ -95,9 +98,16 @@ export default function DashboardPage() {
 
   const currentDashboard = dashboards.find((d) => d.id === activeDashboard);
 
+  const greeting = (() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  })();
+
   if (loading) return (
     <div className="flex items-center justify-center h-64">
-      <RefreshCw className="w-6 h-6 animate-spin" style={{ color: "var(--primary)" }} />
+      <RefreshCw className="w-6 h-6 animate-spin text-primary" />
     </div>
   );
 
@@ -114,107 +124,22 @@ export default function DashboardPage() {
     </div>
   );
 
+  const metricWidgets = currentDashboard?.widgets.filter((w) => w.type === "metric_card") ?? [];
+  const chartWidgets = currentDashboard?.widgets.filter((w) => w.type === "line_chart" || w.type === "bar_chart") ?? [];
+  const forecastWidgets = currentDashboard?.widgets.filter((w) => w.type === "forecast") ?? [];
+
   return (
     <div className="space-y-xl">
       {/* Welcome Header */}
       <section>
         <h2 className="font-display-lg text-headline-lg-mobile md:text-display-lg font-bold text-on-surface tracking-tight mb-sm">
-          Good morning, <span className="text-primary">there.</span>
+          {greeting}, <span className="text-primary">{user?.full_name?.split(" ")[0] ?? "there"}</span>.
         </h2>
-        <p className="font-body-lg text-body-lg text-on-surface-variant flex items-center gap-sm">
-          Revenue is up <span className="text-[#34d399] font-mono-sm text-mono-sm bg-[rgba(52,211,153,0.1)] px-2 py-0.5 rounded border border-[rgba(52,211,153,0.2)]">18%</span> this month.
+        <p className="font-body-lg text-body-lg text-on-surface-variant">
+          {currentDashboard
+            ? `Viewing "${currentDashboard.name}" — ${dashboards.length} dashboard${dashboards.length !== 1 ? "s" : ""} across ${datasets.length} dataset${datasets.length !== 1 ? "s" : ""}.`
+            : "Select or create a dashboard to get started."}
         </p>
-      </section>
-
-      {/* AI Summary Card */}
-      <section className="ai-gradient-card rounded-xl p-lg ai-shimmer relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-tertiary-container/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
-        <div className="relative z-10">
-          <div className="flex items-center gap-sm mb-md">
-            <span className="material-symbols-outlined text-tertiary">auto_awesome</span>
-            <h3 className="font-headline-md text-headline-md text-on-surface font-semibold">Critical Insights</h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
-            <div className="glass-card rounded-lg p-md flex items-start gap-md" style={{ border: "1px solid rgba(255,180,171,0.2)" }}>
-              <div className="mt-1 w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: "var(--error)", boxShadow: "0 0 8px rgba(255,180,171,0.5)" }}></div>
-              <div>
-                <p className="font-body-md text-body-md text-on-surface">Inventory risk detected in UK region.</p>
-                <span className="font-mono-sm text-mono-sm block mt-xs" style={{ color: "var(--error)" }}>Action required within 48h</span>
-              </div>
-            </div>
-            <div className="glass-card rounded-lg p-md flex items-start gap-md" style={{ border: "1px solid rgba(52,211,153,0.2)" }}>
-              <div className="mt-1 w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: "#34d399", boxShadow: "0 0 8px rgba(52,211,153,0.5)" }}></div>
-              <div>
-                <p className="font-body-md text-body-md text-on-surface">Customer churn improving in SaaS segment.</p>
-                <span className="font-mono-sm text-mono-sm block mt-xs" style={{ color: "#34d399" }}>Predictive retention up 4.2%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Metric Grid */}
-      <section className="grid grid-cols-2 lg:grid-cols-5 gap-md">
-        <div className="glass-card rounded-xl p-md flex flex-col justify-between hover:border-outline-variant transition-colors group">
-          <div>
-            <p className="font-label-sm text-label-sm text-on-surface-variant mb-xs">Revenue</p>
-            <div className="flex items-end gap-sm">
-              <h4 className="font-headline-md text-headline-md text-on-surface">$2.4M</h4>
-              <span className="font-mono-sm text-mono-sm text-[#34d399] pb-1 flex items-center"><span className="material-symbols-outlined text-[14px]">arrow_upward</span>12%</span>
-            </div>
-          </div>
-          <div className="mt-md text-primary opacity-60 group-hover:opacity-100 transition-opacity">
-            <svg className="w-full h-[40px]" viewBox="0 0 100 40"><path d="M0,30 L20,25 L40,35 L60,15 L80,20 L100,5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          </div>
-        </div>
-        <div className="glass-card rounded-xl p-md flex flex-col justify-between hover:border-outline-variant transition-colors group">
-          <div>
-            <p className="font-label-sm text-label-sm text-on-surface-variant mb-xs">MRR</p>
-            <div className="flex items-end gap-sm">
-              <h4 className="font-headline-md text-headline-md text-on-surface">$850K</h4>
-              <span className="font-mono-sm text-mono-sm text-[#34d399] pb-1 flex items-center"><span className="material-symbols-outlined text-[14px]">arrow_upward</span>5%</span>
-            </div>
-          </div>
-          <div className="mt-md text-secondary opacity-60 group-hover:opacity-100 transition-opacity">
-            <svg className="w-full h-[40px]" viewBox="0 0 100 40"><path d="M0,35 L20,30 L40,20 L60,25 L80,10 L100,15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          </div>
-        </div>
-        <div className="glass-card rounded-xl p-md flex flex-col justify-between hover:border-outline-variant transition-colors group">
-          <div>
-            <p className="font-label-sm text-label-sm text-on-surface-variant mb-xs">ARR</p>
-            <div className="flex items-end gap-sm">
-              <h4 className="font-headline-md text-headline-md text-on-surface">$10.2M</h4>
-              <span className="font-mono-sm text-mono-sm pb-1 flex items-center" style={{ color: "var(--on-surface-variant)" }}>Stable</span>
-            </div>
-          </div>
-          <div className="mt-md opacity-60 group-hover:opacity-100 transition-opacity" style={{ color: "var(--outline)" }}>
-            <svg className="w-full h-[40px]" viewBox="0 0 100 40"><path d="M0,20 L20,22 L40,18 L60,20 L80,19 L100,20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          </div>
-        </div>
-        <div className="glass-card rounded-xl p-md flex flex-col justify-between hover:border-outline-variant transition-colors group">
-          <div>
-            <p className="font-label-sm text-label-sm text-on-surface-variant mb-xs">Conversion Rate</p>
-            <div className="flex items-end gap-sm">
-              <h4 className="font-headline-md text-headline-md text-on-surface">4.8%</h4>
-              <span className="font-mono-sm text-mono-sm pb-1 flex items-center" style={{ color: "var(--error)" }}><span className="material-symbols-outlined text-[14px]">arrow_downward</span>1.2%</span>
-            </div>
-          </div>
-          <div className="mt-md opacity-60 group-hover:opacity-100 transition-opacity" style={{ color: "var(--error)" }}>
-            <svg className="w-full h-[40px]" viewBox="0 0 100 40"><path d="M0,10 L20,15 L40,5 L60,25 L80,20 L100,35" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          </div>
-        </div>
-        <div className="glass-card rounded-xl p-md flex flex-col justify-between hover:border-outline-variant transition-colors group col-span-2 lg:col-span-1">
-          <div>
-            <p className="font-label-sm text-label-sm text-on-surface-variant mb-xs">Customer Growth</p>
-            <div className="flex items-end gap-sm">
-              <h4 className="font-headline-md text-headline-md text-on-surface">+1,204</h4>
-              <span className="font-mono-sm text-mono-sm text-[#34d399] pb-1 flex items-center"><span className="material-symbols-outlined text-[14px]">arrow_upward</span>24%</span>
-            </div>
-          </div>
-          <div className="mt-md opacity-60 group-hover:opacity-100 transition-opacity" style={{ color: "var(--tertiary)" }}>
-            <svg className="w-full h-[40px]" viewBox="0 0 100 40"><path d="M0,35 L20,38 L40,25 L60,15 L80,20 L100,5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          </div>
-        </div>
       </section>
 
       {error && (
@@ -258,109 +183,53 @@ export default function DashboardPage() {
 
       {currentDashboard ? (
         <>
-          {/* Main Chart Area */}
-          <section className="glass-card rounded-xl p-lg border-t border-primary/20">
-            <div className="flex justify-between items-center mb-lg">
-              <div>
-                <h3 className="font-headline-md text-headline-md text-on-surface font-semibold">Revenue vs. Forecast</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant">Q3 Fiscal Year Projection</p>
-              </div>
-              <div className="flex gap-sm">
-                <button className="px-3 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm border border-outline-variant">1M</button>
-                <button className="px-3 py-1 rounded bg-primary/20 text-primary font-label-sm text-label-sm border border-primary/30">3M</button>
-                <button className="px-3 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm border border-outline-variant">YTD</button>
-              </div>
-            </div>
-            {currentDashboard.widgets.filter((w) => w.type === "line_chart" || w.type === "bar_chart").map((widget) => {
-              const data = dashboardData[widget.id] as { x: string; value: number }[] | undefined;
-              return <RevenueChart key={widget.id} title={widget.title} data={data ?? []} type={widget.type === "bar_chart" ? "bar" : "line"} color={widget.color} />;
-            })}
-          </section>
+          {/* Metric Cards from real widget data */}
+          {metricWidgets.length > 0 && (
+            <section className={cn("grid gap-md", metricWidgets.length <= 3 ? `grid-cols-${metricWidgets.length}` : "grid-cols-2 lg:grid-cols-4")}>
+              {metricWidgets.map((widget) => {
+                const data = dashboardData[widget.id] as { value: number } | undefined;
+                return (
+                  <div key={widget.id} className="glass-card rounded-xl p-md flex flex-col justify-between hover:border-outline-variant transition-colors group">
+                    <MetricsCard title={widget.title} value={data?.value ?? 0} color={widget.color} />
+                  </div>
+                );
+              })}
+            </section>
+          )}
 
-          {/* Forecast */}
-          {currentDashboard.widgets.filter((w) => w.type === "forecast").map((widget) => {
+          {/* Charts */}
+          {chartWidgets.length > 0 && (
+            <section className="glass-card rounded-xl p-lg">
+              <div className="flex justify-between items-center mb-lg">
+                <div>
+                  <h3 className="font-headline-md text-headline-md text-on-surface font-semibold">Charts</h3>
+                  <p className="font-body-md text-body-md text-on-surface-variant">{chartWidgets.length} visualization{chartWidgets.length !== 1 ? "s" : ""}</p>
+                </div>
+              </div>
+              <div className="space-y-lg">
+                {chartWidgets.map((widget) => {
+                  const data = dashboardData[widget.id] as { x: string; value: number }[] | undefined;
+                  return (
+                    <RevenueChart
+                      key={widget.id}
+                      title={widget.title}
+                      data={data ?? []}
+                      type={widget.type === "bar_chart" ? "bar" : "line"}
+                      color={widget.color}
+                    />
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
+          {/* Forecasts */}
+          {forecastWidgets.map((widget) => {
             const data = dashboardData[widget.id] as { data: { x: string; value: number; type: "actual" | "forecast" }[]; r2: number; periods: number } | undefined;
-            return <ForecastChart key={widget.id} title={widget.title} data={data ?? { data: [], r2: 0, periods: 0 }} />;
+            return (
+              <ForecastChart key={widget.id} title={widget.title} data={data ?? { data: [], r2: 0, periods: 0 }} />
+            );
           })}
-
-          {/* Secondary Grid */}
-          <section className="grid grid-cols-1 lg:grid-cols-3 gap-lg">
-            <div className="glass-card rounded-xl p-lg flex flex-col">
-              <h3 className="font-headline-md text-headline-md text-on-surface font-semibold mb-md">Sales Funnel</h3>
-              <div className="flex-1 flex flex-col justify-center gap-md">
-                <div className="relative w-full h-8 rounded-sm overflow-hidden bg-surface-container">
-                  <div className="absolute top-0 left-0 h-full w-full bg-primary"></div>
-                  <span className="absolute left-sm top-1/2 -translate-y-1/2 font-mono-sm text-mono-sm z-10 font-bold mix-blend-luminosity text-on-primary-container">Leads: 12,400</span>
-                </div>
-                <div className="relative w-[80%] mx-auto h-8 rounded-sm overflow-hidden bg-surface-container">
-                  <div className="absolute top-0 left-0 h-full w-full bg-secondary"></div>
-                  <span className="absolute left-sm top-1/2 -translate-y-1/2 font-mono-sm text-mono-sm z-10 font-bold mix-blend-luminosity text-on-secondary-container">Qualified: 8,200</span>
-                </div>
-                <div className="relative w-[60%] mx-auto h-8 rounded-sm overflow-hidden bg-surface-container">
-                  <div className="absolute top-0 left-0 h-full w-full bg-tertiary"></div>
-                  <span className="absolute left-sm top-1/2 -translate-y-1/2 font-mono-sm text-mono-sm z-10 font-bold mix-blend-luminosity text-on-tertiary-container">Proposals: 4,100</span>
-                </div>
-                <div className="relative w-[30%] mx-auto h-8 rounded-sm overflow-hidden bg-surface-container">
-                  <div className="absolute top-0 left-0 h-full w-full bg-[#10b981]"></div>
-                  <span className="absolute left-sm top-1/2 -translate-y-1/2 font-mono-sm text-mono-sm z-10 font-bold mix-blend-luminosity text-[#022c22]">Closed: 1,200</span>
-                </div>
-              </div>
-            </div>
-            <div className="glass-card rounded-xl p-lg lg:col-span-1 flex flex-col">
-              <h3 className="font-headline-md text-headline-md text-on-surface font-semibold mb-md">Recent Activity</h3>
-              <div className="space-y-md flex-1 overflow-y-auto pr-2">
-                <div className="flex gap-md">
-                  <div className="mt-1 w-2 h-2 rounded-full shrink-0 bg-primary"></div>
-                  <div>
-                    <p className="font-body-md text-body-md text-on-surface">Data model &apos;Q3_Forecast&apos; updated by System.</p>
-                    <span className="font-label-sm text-label-sm text-on-surface-variant">10 mins ago</span>
-                  </div>
-                </div>
-                <div className="flex gap-md">
-                  <div className="mt-1 w-2 h-2 rounded-full shrink-0 bg-tertiary"></div>
-                  <div>
-                    <p className="font-body-md text-body-md text-on-surface">New API integration established (Stripe).</p>
-                    <span className="font-label-sm text-label-sm text-on-surface-variant">1 hour ago</span>
-                  </div>
-                </div>
-                <div className="flex gap-md">
-                  <div className="mt-1 w-2 h-2 rounded-full shrink-0 bg-error"></div>
-                  <div>
-                    <p className="font-body-md text-body-md text-on-surface">Failed sync task in European cluster.</p>
-                    <span className="font-label-sm text-label-sm text-on-surface-variant">3 hours ago</span>
-                  </div>
-                </div>
-                <div className="flex gap-md">
-                  <div className="mt-1 w-2 h-2 rounded-full shrink-0 bg-secondary"></div>
-                  <div>
-                    <p className="font-body-md text-body-md text-on-surface">Weekly executive report generated.</p>
-                    <span className="font-label-sm text-label-sm text-on-surface-variant">Yesterday</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="ai-gradient-card rounded-xl p-lg flex flex-col relative overflow-hidden group">
-              <div className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity" style={{ backgroundImage: "url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDIiLz4KPC9zdmc+')" }}></div>
-              <div className="flex items-center gap-sm mb-md relative z-10">
-                <span className="material-symbols-outlined text-tertiary">lightbulb</span>
-                <h3 className="font-headline-md text-headline-md text-on-surface font-semibold">Suggested Actions</h3>
-              </div>
-              <div className="space-y-sm flex-1 relative z-10">
-                <button className="w-full text-left p-sm rounded-lg bg-surface-container/50 border border-outline-variant/50 hover:bg-surface-container hover:border-tertiary/50 transition-all group/btn">
-                  <p className="font-body-md text-body-md text-on-surface group-hover/btn:text-tertiary transition-colors">Review UK supply chain logistics</p>
-                  <span className="font-label-sm text-label-sm text-on-surface-variant">High Impact</span>
-                </button>
-                <button className="w-full text-left p-sm rounded-lg bg-surface-container/50 border border-outline-variant/50 hover:bg-surface-container hover:border-tertiary/50 transition-all group/btn">
-                  <p className="font-body-md text-body-md text-on-surface group-hover/btn:text-tertiary transition-colors">Adjust ad spend in SaaS sector</p>
-                  <span className="font-label-sm text-label-sm text-on-surface-variant">Medium Impact</span>
-                </button>
-                <button className="w-full text-left p-sm rounded-lg bg-surface-container/50 border border-outline-variant/50 hover:bg-surface-container hover:border-tertiary/50 transition-all group/btn">
-                  <p className="font-body-md text-body-md text-on-surface group-hover/btn:text-tertiary transition-colors">Run Q4 scenario analysis</p>
-                  <span className="font-label-sm text-label-sm text-on-surface-variant">Strategic</span>
-                </button>
-              </div>
-            </div>
-          </section>
 
           {/* Pagination */}
           {totalDashboards > pageSize && (

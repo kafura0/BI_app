@@ -250,14 +250,8 @@ export default function InsightsPage() {
         <div className="font-headline-md text-headline-md text-on-surface mb-md md:mb-0">
           JOAT Intelligence
         </div>
-        <div className="text-on-surface-variant font-body-md text-body-md mb-md md:mb-0">
+        <div className="text-on-surface-variant font-body-md text-body-md">
           © 2024 JOAT Intelligence. All rights reserved.
-        </div>
-        <div className="flex gap-lg">
-          <a className="text-on-surface-variant hover:text-primary font-label-sm text-label-sm transition-colors" href="#">Privacy Policy</a>
-          <a className="text-on-surface-variant hover:text-primary font-label-sm text-label-sm transition-colors" href="#">Terms of Service</a>
-          <a className="text-on-surface-variant hover:text-primary font-label-sm text-label-sm transition-colors" href="#">Security</a>
-          <a className="text-on-surface-variant hover:text-primary font-label-sm text-label-sm transition-colors" href="#">Status</a>
         </div>
       </footer>
     </div>

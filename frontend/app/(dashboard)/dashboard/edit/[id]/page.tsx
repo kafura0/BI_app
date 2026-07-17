@@ -6,18 +6,21 @@ import { ArrowLeft, Save, Loader2, RefreshCw } from "lucide-react";
 import { dashboardsApi, datasetsApi, getErrorMessage } from "@/lib/api";
 import type { WidgetConfig } from "@/types";
 import { WidgetGrid } from "@/components/dashboard/widget-grid";
+import { useToast } from "@/components/ui/toast";
 
 export default function DashboardEditPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const { success: toastSuccess } = useToast();
 
   const [widgets, setWidgets] = useState<WidgetConfig[]>([]);
   const [columns, setColumns] = useState<string[]>([]);
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [widgetData, setWidgetData] = useState<Record<string, any>>({});
+  const [widgetData, setWidgetData] = useState<Record<string, unknown>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -29,6 +32,7 @@ export default function DashboardEditPage() {
         setWidgetData(res.data.widget_data);
         setWidgets(d.widgets as WidgetConfig[]);
         setName(d.name);
+        setDescription(d.description ?? "");
 
         const dsRes = await datasetsApi.get(d.dataset_id);
         if (cancelled) return;
@@ -46,7 +50,8 @@ export default function DashboardEditPage() {
     setSaving(true);
     setError(null);
     try {
-      await dashboardsApi.update(id, { name, widgets });
+      await dashboardsApi.update(id, { name, description: description || undefined, widgets });
+      toastSuccess("Dashboard saved");
       router.push("/dashboard");
     } catch (e) {
       setError(getErrorMessage(e));
@@ -55,37 +60,53 @@ export default function DashboardEditPage() {
   };
 
   if (loading) return (
-    <div className="flex justify-center py-20"><RefreshCw className="w-6 h-6 text-indigo-400 animate-spin" /></div>
+    <div className="flex justify-center py-20">
+      <RefreshCw className="w-6 h-6 text-primary animate-spin" />
+    </div>
   );
 
   return (
-    <div>
+    <div className="space-y-xl">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <Link href="/dashboard" className="text-slate-400 hover:text-white transition-colors">
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="text-2xl font-bold text-white bg-transparent border-b border-transparent hover:border-slate-700 focus:border-indigo-500 focus:outline-none transition-colors flex-1"
-        />
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="inline-flex items-center gap-2 px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white font-medium rounded-lg transition-colors"
-        >
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          Save Changes
-        </button>
+      <div className="glass-card rounded-xl p-lg">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-4 flex-1 min-w-0">
+            <Link href="/dashboard" className="text-on-surface-variant hover:text-on-surface transition-colors shrink-0">
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <div className="flex-1 min-w-0">
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full text-headline-md font-bold text-on-surface bg-transparent border-b border-transparent hover:border-outline-variant focus:border-primary focus:outline-none transition-colors"
+                placeholder="Dashboard name"
+              />
+              <input
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full text-body-md text-on-surface-variant bg-transparent border-b border-transparent hover:border-outline-variant focus:border-primary focus:outline-none transition-colors mt-1"
+                placeholder="Add a description (optional)"
+              />
+            </div>
+          </div>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="inline-flex items-center gap-2 px-5 py-2 bg-primary text-on-primary hover:bg-primary/90 disabled:opacity-60 font-medium rounded-lg transition-colors shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            Save Changes
+          </button>
+        </div>
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">{error}</div>
+        <div className="p-3 rounded-lg text-sm bg-error-container text-on-error-container">{error}</div>
       )}
 
-      <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
-        <p className="text-slate-500 text-sm mb-4">Drag widgets to reorder · Resize by dragging the corner · Click ＋ to add widgets</p>
+      {/* Widget Grid */}
+      <div className="glass-card rounded-xl p-lg">
+        <p className="text-on-surface-variant text-body-md mb-md">Drag widgets to reorder, resize by dragging the corner, or click the ＋ button to add widgets.</p>
         <WidgetGrid
           widgets={widgets}
           columns={columns}
